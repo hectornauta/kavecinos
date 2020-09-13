@@ -1,0 +1,9 @@
+# PYTHON
+*.pyc
+.pyc
+/entorno/
+/env/
+# VISUAL STUDIO cODE
+.vscode
+# PYCHARM
+.idea/
