@@ -28,9 +28,8 @@
 * Crear un archivo llamado nombre_del_widget.py
 * Emplear la lógica utilizando el archivo template.py como base
 * Es aquí donde irán los eventos y las acciones que se hacen
-<!---
-TODO: ampliar esta parte
--->
+* **TODO: ampliar esta parte**
+
 **Probar si anduvo el widget**
 * Moverse a /kamedias/src/UI
 * Comando python nombre_del_widget.py
