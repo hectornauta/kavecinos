@@ -14,7 +14,7 @@
 * Comando pip install PyQt==5.9.2
 
 **Cómo hacer las cosas**
-
+</p>
 **Hacer widgets**
 * Moverse a kamedias/
 * Comando designer
