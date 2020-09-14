@@ -1,7 +1,12 @@
-from QT_Main_UI import *
-from PyQt5.QtWidgets import QFileDialog
-
 import datetime
+import os
+import sys
+from archivo import Archivo
+
+from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtWidgets import QTableWidgetItem
+
+from QT_Main_UI import *
 
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -14,15 +19,26 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.abrirDataset.clicked.connect(self.abrirArchivo)
 
-
     def abrirArchivo(self):
         options = QFileDialog.Options()
-        archivo, _ = QFileDialog.getOpenFileName(self, "Abrir Dataset", "",
+        ruta_de_archivo, _ = QFileDialog.getOpenFileName(self, "Abrir Dataset", "",
                                                  "Archivos de texto (*.txt);; Archivos CSV (*.CSV)", options=options)
-        if archivo:
-            self.label_2.setText("Archivo abierto")
-        
+        if ruta_de_archivo:
+            self.label_2.setText(ruta_de_archivo)
+            archivo = Archivo(ruta_de_archivo)
+            archivo.abrir()
 
+            self.tableWidget.setColumnCount(archivo.numcolumnas)
+            self.tableWidget.setRowCount(archivo.numfilas)
+            self.tableWidget.setHorizontalHeaderLabels(archivo.columnas)
+
+            for fila in range(archivo.numfilas):
+                for columna in range(archivo.numcolumnas):
+                    self.tableWidget.setItem(fila, columna, QTableWidgetItem((archivo.datos[fila][columna])))
+
+        else:
+            self.label_2.setText("Archivo no encontrado")
+        
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
     window = MainWindow()

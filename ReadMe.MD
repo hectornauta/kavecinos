@@ -35,6 +35,12 @@
 * Comando python nombre_del_widget.py
 * Ver errores en la consola
 
+**Cómo ejecutar el programa**
+* Moverse a /kamedias/
+* Activar entorno virtual
+* Moverse a /kamedias/source
+* Comando python .\UI\QT_Main.py
+
 **Tutoriales**
 * Tutorial de todos los widgets https://coderslegacy.com/python/pyqt-qprogressbar/
 * Tutorial de ZetCode http://zetcode.com/gui/pyqt5/
