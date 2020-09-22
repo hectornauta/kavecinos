@@ -2,26 +2,26 @@
 * Bajar Python
 
 **2 - Crear entorno**
-* Moverse a /kamedias/
+* Moverse a /kavecinos/
 * Comando python -m venv entorno
 
 **3 - Activar entorno (hacerse cada vez que se desea agregar cosas con Python)**
-* Moverse a /kamedias/
+* Moverse a /kavecinos/
 * Comando .\entorno\Scripts\activate
 
 **4 - Instalar paquetes (sólo una vez y luego de instalar y activar el entorno)**
-* Moverse a kamedias/
+* Moverse a /kavecinos/
 * Comando pip install PyQt==5.9.2
 
 **Cómo hacer las cosas**
 </p>
 **Hacer widgets**
-* Moverse a kamedias/
+* Moverse a kavecinos/
 * Comando designer
 * Hacemos las cosas que tengamos que hacer, luego la guardamos en la carpeta UI con un nombre adecuado
 
 **Convertir los widgets en scripts de python (debe hacerse cada vez que se modifica un widget con el designer)**
-* Moverse a /kamedias/src/UI
+* Moverse a /kavecinos/src/UI
 * Comando pyuic5 -x nombre_del_widget.ui -o nombre_del_widget_UI.py
 
 **Crear la lógica de los widgets (acá va la lógica, no en el anterior)**
@@ -31,14 +31,14 @@
 * **TODO: ampliar esta parte**
 
 **Probar si anduvo el widget**
-* Moverse a /kamedias/src/UI
+* Moverse a /kavecinos/src/UI
 * Comando python nombre_del_widget.py
 * Ver errores en la consola
 
 **Cómo ejecutar el programa**
-* Moverse a /kamedias/
+* Moverse a /kavecinos/
 * Activar entorno virtual
-* Moverse a /kamedias/source
+* Moverse a /kavecinos/source
 * Comando python .\UI\QT_Main.py
 
 **Tutoriales**
