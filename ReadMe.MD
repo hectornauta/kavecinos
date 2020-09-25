@@ -11,14 +11,15 @@
 
 **4 - Instalar paquetes (sólo una vez y luego de instalar y activar el entorno)**
 * Moverse a /kavecinos/
-* Comando pip install PyQt==5.9.2
+* Comando pip install PyQt5
+* Comando pip install pyqt5-tools
+* Comando pip install matplotlib
 
-**Cómo hacer las cosas**
-</p>
-**Hacer widgets**
-* Moverse a kavecinos/
-* Comando designer
-* Hacemos las cosas que tengamos que hacer, luego la guardamos en la carpeta UI con un nombre adecuado
+**Cómo hacer las cosas**  
+**Hacer widgets**  
+* Moverse a kavecinos/  
+* Comando designer  
+* Hacemos las cosas que tengamos que hacer, luego la guardamos en la carpeta UI con un nombre adecuado  
 
 **Convertir los widgets en scripts de python (debe hacerse cada vez que se modifica un widget con el designer)**
 * Moverse a /kavecinos/src/UI
@@ -38,7 +39,7 @@
 **Cómo ejecutar el programa**
 * Moverse a /kavecinos/
 * Activar entorno virtual
-* Moverse a /kavecinos/source
+* Moverse a /kavecinos/src
 * Comando python .\UI\QT_Main.py
 
 **Tutoriales**
