@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>784</width>
-    <height>557</height>
+    <height>558</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -122,6 +122,45 @@
        <string>TextLabel</string>
       </property>
      </widget>
+     <widget class="QLabel" name="labelTrain">
+      <property name="geometry">
+       <rect>
+        <x>70</x>
+        <y>90</y>
+        <width>151</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Porcentaje de Entrenamiento</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelTest">
+      <property name="geometry">
+       <rect>
+        <x>70</x>
+        <y>130</y>
+        <width>131</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Porcentaje de Prueba</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelK">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>20</y>
+        <width>91</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Elegir valor de K</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QGroupBox" name="groupBox_3">
      <property name="geometry">
@@ -165,6 +204,9 @@
       <width>100</width>
       <height>40</height>
      </rect>
+    </property>
+    <property name="statusTip">
+     <string/>
     </property>
     <property name="text">
      <string>Abrir Dataset</string>
