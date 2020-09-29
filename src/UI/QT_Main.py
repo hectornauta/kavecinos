@@ -12,14 +12,11 @@ from core import predecirClase
 
 from copy import deepcopy
 
-from PyQt5.QtWidgets import QFileDialog
-from PyQt5.QtWidgets import QTableWidgetItem
 
 from matplotlib import pyplot
 from matplotlib import colors
 import matplotlib.patches as mpatches
 
-from QT_Main_UI import *
 
 import random
 
@@ -55,8 +52,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.label_2.setText(fecha)
 
-        self.abrirDataset.clicked.connect(self.abrirArchivo)
-        self.btnVerDataset.clicked.connect(self.graficarDataset)
 
         self.btnEntrenar.clicked.connect(self.entrenarModelo)
         self.btnTest.clicked.connect(self.testearModelo)
@@ -231,7 +226,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         grafico.show()
 
 if __name__ == "__main__":
-    app = QtWidgets.QApplication([])
-    window = MainWindow()
-    window.show()
-    app.exec_()
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    MainWindow = QtWidgets.QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    MainWindow.show()
+    sys.exit(app.exec_())
