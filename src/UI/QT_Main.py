@@ -4,6 +4,7 @@ import sys
 #import logging
 #logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 from archivo import Archivo
+from core import *
 
 
 from PyQt5.QtWidgets import QFileDialog
@@ -24,6 +25,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.abrirDataset.clicked.connect(self.abrirArchivo)
         self.btnVerDataset.clicked.connect(self.graficarDataset)
+
+        self.btnEntrenar.clicked.connect(self.entrenarModelo)
+        self.spinEntrenamiento.valueChanged.connect(self.cambiarPorcentajes)
+
+        #Inicializar widgets
+
+    def entrenarModelo(self):
+        archivo.datosDeEntrenamiento(self.porcentajeEntrenamiento)
+        pyplot.plot(archivo.datosEntrenamientoX,archivo.datosEntrenamientoY,'go')
+        pyplot.show()
+        
+    def cambiarPorcentajes(self):
+        self.porcentajeEntrenamiento = self.spinEntrenamiento.value()
+        self.porcentajeTest = 100 - self.spinEntrenamiento.value()
+        self.labelTest_2.setText(str(self.porcentajeTest))
 
     def abrirArchivo(self):
         options = QFileDialog.Options()
@@ -47,7 +63,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.label_2.setText("Archivo no encontrado")
     def graficarDataset(self):
         #logging.debug(archivo.x)
-        pyplot.plot(archivo.x,archivo.y,'bo')
+        print(archivo.datosEntrenamiento)
+        for punto in archivo.datosEntrenamiento:
+            if punto[2] == archivo.conjuntoDeClases[0]:
+                pyplot.plot(punto[0],punto[1],'bo')
+            else:
+                pyplot.plot(punto[0],punto[1],'ro')
         #TODO: Hacer ciclo para todas categorizar todas las clases
         pyplot.show()
 
