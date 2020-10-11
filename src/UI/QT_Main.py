@@ -42,7 +42,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         fecha = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
 
-        self.datos = Datos()
         self.colores = list()
         self.numero_de_divisiones = 10
 
@@ -126,6 +125,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             #print("datos del archivo")
             #print(self.archivo.datos)
+            self.datos = Datos()
 
             self.datos.generar(deepcopy(self.archivo.datos))
 
@@ -147,12 +147,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #logging.debug(archivo.x)
         #print(self.datos.datosCompletos)
 
+        pyplot.clf()
         self.colores = colors.TABLEAU_COLORS
         
         divisionX = (self.datos.maxX() + 1 - self.datos.minX() + 1) / (self.numero_de_divisiones)
         divisionY = (self.datos.maxY() + 1 - self.datos.minY() + 1) / (self.numero_de_divisiones)
         #print(divisionX)
-
         pyplot.xlim(self.datos.minX() - 1,self.datos.maxX() + 1)
         pyplot.ylim(self.datos.minY() - 1,self.datos.maxY() + 1)
 
