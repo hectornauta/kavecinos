@@ -1,3 +1,4 @@
+import random
 
 class Datos():
     def __init__(self):
@@ -28,3 +29,9 @@ class Datos():
         return(min(self.y))
     def maxY(self):
         return(max(self.y))
+    def aleatorizar(self):
+        random.shuffle(self.datosCompletos)
+    def obtenerDatosEntrenamiento(self,porcentajeEntrenamiento):
+        self.datosEntrenamiento = self.datosCompletos[0:(int((len(self.datosCompletos)*porcentajeEntrenamiento)/100))]
+    def obtenerDatosTest(self,porcentajeEntrenamiento):
+        self.datosTest = self.datosCompletos[(int((len(self.datosCompletos)*porcentajeEntrenamiento)/100)):]

@@ -5,7 +5,9 @@ import sys
 #logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 from archivo import Archivo
 from datos import Datos
-from core import *
+from core import vecinos
+from core import distancia
+from core import prediccion
 
 from copy import deepcopy
 
@@ -24,6 +26,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         QtWidgets.QMainWindow.__init__(self, *args, **kwargs)
         self.setupUi(self)
 
+        #Inicializando botones y esas weas
+        
+        self.btnEntrenar.setEnabled(False)
+        self.btnVerDataset.setEnabled(False)
+        self.btnTest.setEnabled(False)
+        self.txtDebug.setReadOnly(True)
+        self.btnPredecirPunto.setEnabled(False)
+        self.spinEntrenamiento.setEnabled(False)
+        self.labelTest_2.setText(str(30))
+        self.spinEntrenamiento.setValue(70)
+        self.linePuntoX.setEnabled(False)
+        self.linePuntoY.setEnabled(False)
+
+
         fecha = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
 
         self.datos = Datos()
@@ -36,6 +52,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.btnVerDataset.clicked.connect(self.graficarDataset)
 
         self.btnEntrenar.clicked.connect(self.entrenarModelo)
+        self.btnTest.clicked.connect(self.testearModelo)
+        self.btnPredecirPunto.clicked.connect(self.predecirPunto)
         self.spinEntrenamiento.valueChanged.connect(self.cambiarPorcentajes)
 
         #Inicializar widgets
@@ -44,6 +62,47 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.archivo.datosDeEntrenamiento(self.porcentajeEntrenamiento)
         pyplot.plot(self.archivo.datosEntrenamientoX,self.archivo.datosEntrenamientoY,'go')
         pyplot.show()
+        #TODO: actualizar con los nuevos datos
+    def predecirPunto(self):
+        #mipunto = [5.91,3.79]
+
+        mipunto = list()
+        mipunto.append(float(self.linePuntoX.text()))
+        mipunto.append(float(self.linePuntoY.text()))
+        
+        self.datos.aleatorizar()
+        #puntosDeEntrenamiento = self.datos.obtenerDatosEntrenamiento(self.porcentajeEntrenamiento)
+        #puntosDeTest = self.datos.obtenerDatosTest(self.porcentajeEntrenamiento)
+        for i in range(1,11):
+            loskvecinos = vecinos(self.datos.datosCompletos,mipunto,i)
+            #print("Para " + str(i) + " vecinos sus vecinos más cercanos son:")
+            #print(loskvecinos)
+            claseDelPunto = prediccion (mipunto,loskvecinos)
+            #print("La clase predicha fue " + claseDelPunto)
+            self.txtDebug.insertPlainText("Con " +str(i) + " vecinos, la clase predicha fue " + claseDelPunto + "\n")
+        #self.archivo.datosDeEntrenamiento(self.porcentajeEntrenamiento)
+        #pyplot.plot(self.archivo.datosEntrenamientoX,self.archivo.datosEntrenamientoY,'go')
+        #pyplot.show()
+    def testearModelo(self):
+        #mipunto = [5.91,3.79]
+
+        mipunto = list()
+        mipunto.append(float(self.txtPuntoX.toPlainText()))
+        mipunto.append(float(self.txtPuntoY.toPlainText()))
+        
+        self.datos.aleatorizar()
+        #puntosDeEntrenamiento = self.datos.obtenerDatosEntrenamiento(self.porcentajeEntrenamiento)
+        #puntosDeTest = self.datos.obtenerDatosTest(self.porcentajeEntrenamiento)
+        for i in range(1,11):
+            loskvecinos = vecinos(self.datos.datosCompletos,mipunto,i)
+            #print("Para " + str(i) + " vecinos sus vecinos más cercanos son:")
+            #print(loskvecinos)
+            claseDelPunto = prediccion (mipunto,loskvecinos)
+            #print("La clase predicha fue " + claseDelPunto)
+            self.txtDebug.insertPlainText("Con " +str(i) + " vecinos, la clase predicha fue " + claseDelPunto + "\n")
+        #self.archivo.datosDeEntrenamiento(self.porcentajeEntrenamiento)
+        #pyplot.plot(self.archivo.datosEntrenamientoX,self.archivo.datosEntrenamientoY,'go')
+        #pyplot.show()
         
     def cambiarPorcentajes(self):
         self.porcentajeEntrenamiento = self.spinEntrenamiento.value()
@@ -58,6 +117,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.label_2.setText(ruta_de_archivo)
             self.archivo = Archivo(ruta_de_archivo)
             self.archivo.abrir()
+            self.btnVerDataset.setEnabled(True)
+            #self.btnTest.setEnabled(True)
+            self.btnPredecirPunto.setEnabled(True)
+            self.spinEntrenamiento.setEnabled(True)
+            self.linePuntoX.setEnabled(True)
+            self.linePuntoY.setEnabled(True)
 
             #print("datos del archivo")
             #print(self.archivo.datos)
@@ -102,7 +167,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             diccionario[clase] = lista[i][0]#.replace('tab:','')
             i = i + 1
         for punto in self.datos.datosCompletos:
-            print(diccionario[punto[2]])
+            #print(diccionario[punto[2]])
             pyplot.plot(punto[0],punto[1],marker = 'o',color = diccionario[punto[2]])
         #pyplot.grid()
         pyplot.show()

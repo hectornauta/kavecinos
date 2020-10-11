@@ -146,13 +146,13 @@
       </property>
      </widget>
     </widget>
-    <widget class="QTextEdit" name="txtDebug">
+    <widget class="QPlainTextEdit" name="txtDebug">
      <property name="geometry">
       <rect>
        <x>10</x>
        <y>260</y>
-       <width>321</width>
-       <height>161</height>
+       <width>311</width>
+       <height>171</height>
       </rect>
      </property>
     </widget>
@@ -193,7 +193,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Test</string>
+     <string>Probar Modelo</string>
     </property>
    </widget>
    <widget class="QPushButton" name="btnVerDataset">
@@ -207,6 +207,39 @@
     </property>
     <property name="text">
      <string>Ver dataset</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btnPredecirPunto">
+    <property name="geometry">
+     <rect>
+      <x>610</x>
+      <y>10</y>
+      <width>151</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Predecir</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="linePuntoX">
+    <property name="geometry">
+     <rect>
+      <x>490</x>
+      <y>10</y>
+      <width>51</width>
+      <height>31</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="linePuntoY">
+    <property name="geometry">
+     <rect>
+      <x>550</x>
+      <y>10</y>
+      <width>51</width>
+      <height>31</height>
+     </rect>
     </property>
    </widget>
   </widget>
