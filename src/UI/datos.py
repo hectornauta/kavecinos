@@ -33,5 +33,7 @@ class Datos():
         random.shuffle(self.datosCompletos)
     def obtenerDatosEntrenamiento(self,porcentajeEntrenamiento):
         self.datosEntrenamiento = self.datosCompletos[0:(int((len(self.datosCompletos)*porcentajeEntrenamiento)/100))]
+        return self.datosEntrenamiento
     def obtenerDatosTest(self,porcentajeEntrenamiento):
         self.datosTest = self.datosCompletos[(int((len(self.datosCompletos)*porcentajeEntrenamiento)/100)):]
+        return self.datosTest

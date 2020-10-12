@@ -17,8 +17,11 @@ from PyQt5.QtWidgets import QTableWidgetItem
 
 from matplotlib import pyplot
 from matplotlib import colors
+import matplotlib.patches as mpatches
 
 from QT_Main_UI import *
+
+import random
 
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -39,11 +42,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.linePuntoX.setEnabled(False)
         self.linePuntoY.setEnabled(False)
 
+        self.porcentajeEntrenamiento = 70
+        self.porcentajeTest = 30
+
 
         fecha = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
 
         self.colores = list()
-        self.numero_de_divisiones = 10
+        self.numero_de_divisiones = 10 #El video mostraba ~68
 
         self.label_2.setText(fecha)
 
@@ -83,22 +89,30 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #pyplot.plot(self.archivo.datosEntrenamientoX,self.archivo.datosEntrenamientoY,'go')
         #pyplot.show()
     def testearModelo(self):
-        #mipunto = [5.91,3.79]
-
-        mipunto = list()
-        mipunto.append(float(self.txtPuntoX.toPlainText()))
-        mipunto.append(float(self.txtPuntoY.toPlainText()))
-        
+        self.txtDebug.clear()
         self.datos.aleatorizar()
-        #puntosDeEntrenamiento = self.datos.obtenerDatosEntrenamiento(self.porcentajeEntrenamiento)
-        #puntosDeTest = self.datos.obtenerDatosTest(self.porcentajeEntrenamiento)
+        print(self.datos.datosCompletos)
+        puntosDeEntrenamiento = self.datos.obtenerDatosEntrenamiento(self.porcentajeEntrenamiento)
+        puntosDeTest = self.datos.obtenerDatosTest(self.porcentajeEntrenamiento)
+
+        resultados = list()
+
         for i in range(1,11):
-            loskvecinos = vecinos(self.datos.datosCompletos,mipunto,i)
-            #print("Para " + str(i) + " vecinos sus vecinos más cercanos son:")
-            #print(loskvecinos)
-            claseDelPunto = prediccion (mipunto,loskvecinos)
-            #print("La clase predicha fue " + claseDelPunto)
-            self.txtDebug.insertPlainText("Con " +str(i) + " vecinos, la clase predicha fue " + claseDelPunto + "\n")
+            aciertos = 0
+            totalElementos = 0
+            #TODO: mostrar en una tabla los resultados, por ejemplo
+            #clasesPredichas = list()
+            #clasesReales = list()
+            for puntoDeTest in puntosDeTest:
+                loskvecinos = vecinos(puntosDeEntrenamiento,puntoDeTest,i)
+                claseDelPunto = prediccion (puntoDeTest,loskvecinos)
+                totalElementos = totalElementos + 1
+                if (claseDelPunto==puntoDeTest[-1]):
+                    aciertos = aciertos + 1
+            porcentajeDeAciertos = (aciertos / totalElementos) * 100
+            resultados.append((i,porcentajeDeAciertos))
+        for resultado in resultados:
+            self.txtDebug.insertPlainText("Para un k = " + str(resultado[0]) + " el porcentaje de aciertos fue de " + "{:.2f}".format(resultado[1]) + "% \n")
         #self.archivo.datosDeEntrenamiento(self.porcentajeEntrenamiento)
         #pyplot.plot(self.archivo.datosEntrenamientoX,self.archivo.datosEntrenamientoY,'go')
         #pyplot.show()
@@ -117,7 +131,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.archivo = Archivo(ruta_de_archivo)
             self.archivo.abrir()
             self.btnVerDataset.setEnabled(True)
-            #self.btnTest.setEnabled(True)
+            self.btnTest.setEnabled(True)
             self.btnPredecirPunto.setEnabled(True)
             self.spinEntrenamiento.setEnabled(True)
             self.linePuntoX.setEnabled(True)
@@ -146,19 +160,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def graficarDataset(self):
         #logging.debug(archivo.x)
         #print(self.datos.datosCompletos)
-
+        valorDeSeparacion = 1
         pyplot.clf()
-        self.colores = colors.TABLEAU_COLORS
+        #grafico,ax = pyplot.subplots()
+        grafico = pyplot.figure(figsize=(8,8))
+        self.colores = colors.TABLEAU_COLORS #10 colores de momento
         
-        divisionX = (self.datos.maxX() + 1 - self.datos.minX() + 1) / (self.numero_de_divisiones)
-        divisionY = (self.datos.maxY() + 1 - self.datos.minY() + 1) / (self.numero_de_divisiones)
+        divisionX = (self.datos.maxX() + valorDeSeparacion - self.datos.minX() + valorDeSeparacion) / (self.numero_de_divisiones)
+        divisionY = (self.datos.maxY() + valorDeSeparacion - self.datos.minY() + valorDeSeparacion) / (self.numero_de_divisiones)
         #print(divisionX)
-        pyplot.xlim(self.datos.minX() - 1,self.datos.maxX() + 1)
-        pyplot.ylim(self.datos.minY() - 1,self.datos.maxY() + 1)
+        pyplot.xlim(self.datos.minX() - valorDeSeparacion,self.datos.maxX() + valorDeSeparacion)
+        pyplot.ylim(self.datos.minY() - valorDeSeparacion,self.datos.maxY() + valorDeSeparacion)
 
         for i in range(self.numero_de_divisiones + 1):
-            pyplot.axvline(x = self.datos.minX() - 1 + divisionX * i)
-            pyplot.axhline(y = self.datos.minY() - 1 + divisionY * i)
+            pyplot.axvline(x = self.datos.minX() - valorDeSeparacion + divisionX * i)
+            pyplot.axhline(y = self.datos.minY() - valorDeSeparacion + divisionY * i)
 
         diccionario = {}
         i = 0
@@ -170,7 +186,43 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #print(diccionario[punto[2]])
             pyplot.plot(punto[0],punto[1],marker = 'o',color = diccionario[punto[2]])
         #pyplot.grid()
-        pyplot.show()
+
+        #Crear cuadrados
+        k = 7
+        coordenadas = list()
+        cuadrados = []
+        origenX = self.datos.minX() - valorDeSeparacion
+        origenY = self.datos.minY() - valorDeSeparacion
+        salto = divisionX/2
+        saltoDelCuadrado = divisionX
+        x = origenX + salto
+        y = origenX + salto
+        xDelCuadrado = origenX
+        yDelCuadrado = origenY
+        random.seed(0)
+        ax = grafico.add_subplot()
+        ax.plot([origenX,divisionX*self.numero_de_divisiones],[origenY,divisionY*self.numero_de_divisiones])    
+        for i in range(self.numero_de_divisiones):
+            x = origenX
+            xDelCuadrado = origenX
+            for j in range(self.numero_de_divisiones):
+                if ((random.randint(0,5))==0):
+                    color = 'b'
+                else:
+                    color = 'g'
+                cuadrado = mpatches.Rectangle((x,y),saltoDelCuadrado,saltoDelCuadrado,angle = 0.0,color=color, alpha=0.5)
+                #grafico.patches.extend([pyplot.Rectangle((x,y),saltoDelCuadrado,saltoDelCuadrado,
+                                  #fill=True, color=color, alpha=0.5, zorder=1000,
+                                  #transform=grafico.transFigure, figure=grafico)])
+                cuadrados.append(cuadrado)
+                ax.add_patch(cuadrado)
+                x = x + saltoDelCuadrado
+                xDelCuadrado = xDelCuadrado + saltoDelCuadrado
+            y = y + saltoDelCuadrado
+            yDelCuadrado = yDelCuadrado + saltoDelCuadrado
+        for c in cuadrados:
+            print(str(c) + "/n")
+        grafico.show()
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])

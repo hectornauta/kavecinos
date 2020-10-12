@@ -68,7 +68,7 @@
       </rect>
      </property>
      <property name="title">
-      <string>Parámetros del algoritmo</string>
+      <string>Paramétros para testearrendimiento del algoritmo</string>
      </property>
      <widget class="QLabel" name="labelEntrenamiento">
       <property name="geometry">
