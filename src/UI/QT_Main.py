@@ -8,9 +8,9 @@ from datos import Datos
 from core import vecinos
 from core import distancia
 from core import prediccion
+from core import predecirClase
 
 from copy import deepcopy
-
 
 from PyQt5.QtWidgets import QFileDialog
 from PyQt5.QtWidgets import QTableWidgetItem
@@ -45,11 +45,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.porcentajeEntrenamiento = 70
         self.porcentajeTest = 30
 
+        self.diccionario = {}
 
         fecha = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
 
         self.colores = list()
-        self.numero_de_divisiones = 10 #El video mostraba ~68
+        self.ladoDeUnCuadrado = 1
+        self.numero_de_divisiones = 70 #El video mostraba ~68
 
         self.label_2.setText(fecha)
 
@@ -157,71 +159,75 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         else:
             self.label_2.setText("Archivo no encontrado")
-    def graficarDataset(self):
-        #logging.debug(archivo.x)
-        #print(self.datos.datosCompletos)
-        valorDeSeparacion = 1
-        pyplot.clf()
-        #grafico,ax = pyplot.subplots()
-        grafico = pyplot.figure(figsize=(8,8))
-        self.colores = colors.TABLEAU_COLORS #10 colores de momento
-        
-        divisionX = (self.datos.maxX() + valorDeSeparacion - self.datos.minX() + valorDeSeparacion) / (self.numero_de_divisiones)
-        divisionY = (self.datos.maxY() + valorDeSeparacion - self.datos.minY() + valorDeSeparacion) / (self.numero_de_divisiones)
-        #print(divisionX)
-        pyplot.xlim(self.datos.minX() - valorDeSeparacion,self.datos.maxX() + valorDeSeparacion)
-        pyplot.ylim(self.datos.minY() - valorDeSeparacion,self.datos.maxY() + valorDeSeparacion)
 
-        for i in range(self.numero_de_divisiones + 1):
-            pyplot.axvline(x = self.datos.minX() - valorDeSeparacion + divisionX * i)
-            pyplot.axhline(y = self.datos.minY() - valorDeSeparacion + divisionY * i)
-
-        diccionario = {}
-        i = 0
-        lista = list(self.colores.items())
-        for clase in self.datos.clases:
-            diccionario[clase] = lista[i][0]#.replace('tab:','')
-            i = i + 1
-        for punto in self.datos.datosCompletos:
-            #print(diccionario[punto[2]])
-            pyplot.plot(punto[0],punto[1],marker = 'o',color = diccionario[punto[2]])
-        #pyplot.grid()
-
-        #Crear cuadrados
-        k = 7
+    def insertarGrid(self,grafico,ejes,limiteInferiorX,limiteSuperiorX,limiteInferiorY,limiteSuperiorY,k,salto):
         coordenadas = list()
         cuadrados = []
-        origenX = self.datos.minX() - valorDeSeparacion
-        origenY = self.datos.minY() - valorDeSeparacion
-        salto = divisionX/2
-        saltoDelCuadrado = divisionX
-        x = origenX + salto
-        y = origenX + salto
-        xDelCuadrado = origenX
-        yDelCuadrado = origenY
-        random.seed(0)
-        ax = grafico.add_subplot()
-        ax.plot([origenX,divisionX*self.numero_de_divisiones],[origenY,divisionY*self.numero_de_divisiones])    
-        for i in range(self.numero_de_divisiones):
-            x = origenX
-            xDelCuadrado = origenX
-            for j in range(self.numero_de_divisiones):
-                if ((random.randint(0,5))==0):
-                    color = 'b'
-                else:
-                    color = 'g'
-                cuadrado = mpatches.Rectangle((x,y),saltoDelCuadrado,saltoDelCuadrado,angle = 0.0,color=color, alpha=0.5)
+        x = limiteInferiorX
+        y = limiteInferiorY
+        random.seed(datetime.datetime.now())
+
+        xDePrueba = x + self.ladoDeUnCuadrado/2
+        yDePrueba = y + self.ladoDeUnCuadrado/2
+        while(y<limiteSuperiorY):
+            x = limiteInferiorX
+            xDePrueba = x + self.ladoDeUnCuadrado/2
+            while(x<limiteSuperiorX):
+                clase = predecirClase(self.datos.datosCompletos,(xDePrueba,yDePrueba),k)
+                color = self.diccionario[clase]
+                cuadrado = mpatches.Rectangle((x,y),self.ladoDeUnCuadrado,self.ladoDeUnCuadrado,angle = 0.0,color=color, alpha=0.5)
                 #grafico.patches.extend([pyplot.Rectangle((x,y),saltoDelCuadrado,saltoDelCuadrado,
                                   #fill=True, color=color, alpha=0.5, zorder=1000,
                                   #transform=grafico.transFigure, figure=grafico)])
                 cuadrados.append(cuadrado)
-                ax.add_patch(cuadrado)
-                x = x + saltoDelCuadrado
-                xDelCuadrado = xDelCuadrado + saltoDelCuadrado
-            y = y + saltoDelCuadrado
-            yDelCuadrado = yDelCuadrado + saltoDelCuadrado
-        for c in cuadrados:
-            print(str(c) + "/n")
+                ejes.add_patch(cuadrado)
+                x = x + self.ladoDeUnCuadrado
+                xDePrueba = x + self.ladoDeUnCuadrado/2
+            y = y + self.ladoDeUnCuadrado
+            yDePrueba = y + self.ladoDeUnCuadrado/2
+        #for c in cuadrados:
+            #print(str(c) + "/n")
+    def graficarDataset(self):
+        valorDeSeparacionX = (self.datos.maxX()-self.datos.minX())*0.1
+        valorDeSeparacionY = (self.datos.maxY()-self.datos.minY())*0.1
+        limiteInferiorX = self.datos.minX() - valorDeSeparacionX
+        limiteSuperiorX =self.datos.maxX() + valorDeSeparacionX
+        limiteInferiorY = self.datos.minY() - valorDeSeparacionY
+        limiteSuperiorY =self.datos.maxY() + valorDeSeparacionY
+        pyplot.clf()
+        grafico = pyplot.figure(figsize=(8,8))
+        ax = grafico.add_subplot()
+        ax.plot(limiteInferiorX,limiteInferiorY)
+        ax.set_aspect(1)
+        self.colores = colors.TABLEAU_COLORS #10 colores de momento
+        
+        #divisionX = (self.datos.maxX() + valorDeSeparacionX - self.datos.minX() + valorDeSeparacionY) / (self.numero_de_divisiones)
+        #divisionY = (self.datos.maxY() + valorDeSeparacionY - self.datos.minY() + valorDeSeparacionY) / (self.numero_de_divisiones)
+        #print(divisionX)
+        pyplot.xlim(limiteInferiorX,limiteSuperiorX)
+        pyplot.ylim(limiteInferiorY,limiteSuperiorY)
+
+        xDelBucle = limiteInferiorX
+        yDelBucle = limiteInferiorY
+        while(xDelBucle<limiteSuperiorX):
+            pyplot.axvline(x = xDelBucle,linestyle = '-',marker = ",",linewidth=0.5)
+            xDelBucle = xDelBucle + self.ladoDeUnCuadrado
+        while(yDelBucle<limiteSuperiorY):
+            pyplot.axhline(y = yDelBucle,linestyle = '-',marker = ",",linewidth=0.5)
+            yDelBucle = yDelBucle + self.ladoDeUnCuadrado
+
+        self.diccionario = {}
+        i = 0
+        lista = list(self.colores.items())
+        for clase in self.datos.clases:
+            self.diccionario[clase] = lista[i][0]
+            i = i + 1
+        for punto in self.datos.datosCompletos:
+            pyplot.plot(punto[0],punto[1],marker = '.',color = self.diccionario[punto[2]])
+        k = 7
+        self.insertarGrid(grafico,ax,limiteInferiorX,limiteSuperiorX,limiteInferiorY,limiteSuperiorY,k,self.ladoDeUnCuadrado)
+        #Crear cuadrados
+        
         grafico.show()
 
 if __name__ == "__main__":
