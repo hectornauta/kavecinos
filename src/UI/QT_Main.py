@@ -41,19 +41,27 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.spinEntrenamiento.setValue(70)
         self.linePuntoX.setEnabled(False)
         self.linePuntoY.setEnabled(False)
+        self.groupBox.setEnabled(False)
+
+
+
+
+        self.comboSeparador.addItems([';',',','Tab','Espacio'])
+
+        self.separadores = {',':',',';':';','Tab':'\t','Espacio':' '}
 
         self.porcentajeEntrenamiento = 70
         self.porcentajeTest = 30
 
         self.diccionario = {}
 
-        fecha = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+        #fecha = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
 
         self.colores = list()
-        self.ladoDeUnCuadrado = 1
+        self.ladoDeUnCuadrado = 0.5
         self.numero_de_divisiones = 70 #El video mostraba ~68
 
-        self.label_2.setText(fecha)
+        self.label_2.setText('No se ha seleccionado ningún archivo')
 
         self.abrirDataset.clicked.connect(self.abrirArchivo)
         self.btnVerDataset.clicked.connect(self.graficarDataset)
@@ -93,7 +101,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def testearModelo(self):
         self.txtDebug.clear()
         self.datos.aleatorizar()
-        print(self.datos.datosCompletos)
+        #print(self.datos.datosCompletos)
         puntosDeEntrenamiento = self.datos.obtenerDatosEntrenamiento(self.porcentajeEntrenamiento)
         puntosDeTest = self.datos.obtenerDatosTest(self.porcentajeEntrenamiento)
 
@@ -131,13 +139,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if ruta_de_archivo:
             self.label_2.setText(ruta_de_archivo)
             self.archivo = Archivo(ruta_de_archivo)
-            self.archivo.abrir()
+            self.archivo.abrir(self.separadores[self.comboSeparador.currentText()])
             self.btnVerDataset.setEnabled(True)
             self.btnTest.setEnabled(True)
             self.btnPredecirPunto.setEnabled(True)
             self.spinEntrenamiento.setEnabled(True)
             self.linePuntoX.setEnabled(True)
             self.linePuntoY.setEnabled(True)
+            self.groupBox.setEnabled(True)
 
             #print("datos del archivo")
             #print(self.archivo.datos)
@@ -199,7 +208,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         ax = grafico.add_subplot()
         ax.plot(limiteInferiorX,limiteInferiorY)
         ax.set_aspect(1)
-        self.colores = colors.TABLEAU_COLORS #10 colores de momento
+        if(len(self.datos.clases)>9):
+            self.colores = colors.CSS4_COLORS
+        else:
+            self.colores = colors.TABLEAU_COLORS
         
         #divisionX = (self.datos.maxX() + valorDeSeparacionX - self.datos.minX() + valorDeSeparacionY) / (self.numero_de_divisiones)
         #divisionY = (self.datos.maxY() + valorDeSeparacionY - self.datos.minY() + valorDeSeparacionY) / (self.numero_de_divisiones)

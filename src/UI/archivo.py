@@ -11,9 +11,9 @@ class Archivo():
         self.x = []
         self.y = []
         self.clases = []
-    def abrir(self):
+    def abrir(self,separador):
         with open(self.ruta, encoding='utf8') as csvfile:
-	        self.datos = list(csv.reader(csvfile,delimiter=';'))
+	        self.datos = list(csv.reader(csvfile,delimiter=separador))
         self.columnas = self.datos[0]
         self.datos.remove(self.datos[0])
         self.numfilas = len(self.datos)
