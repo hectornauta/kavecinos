@@ -2,6 +2,7 @@
 *.pyc
 .pyc
 /entorno/
+/nosubir/
 /env/
 # VISUAL STUDIO cODE
 .vscode
