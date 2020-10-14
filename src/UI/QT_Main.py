@@ -9,6 +9,7 @@ from core import vecinos
 from core import distancia
 from core import prediccion
 from core import predecirClase
+from core import predecirClaseConCalidad
 
 from copy import deepcopy
 
@@ -31,7 +32,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         #Inicializando botones y esas weas
         
-        self.btnEntrenar.setEnabled(False)
         self.btnVerDataset.setEnabled(False)
         self.btnTest.setEnabled(False)
         self.txtDebug.setReadOnly(True)
@@ -42,9 +42,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.linePuntoX.setEnabled(False)
         self.linePuntoY.setEnabled(False)
         self.groupBox.setEnabled(False)
-
-
-
+        self.radioCuadrado.setChecked(True)
 
         self.comboSeparador.addItems([';',',','Tab','Espacio'])
 
@@ -58,7 +56,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #fecha = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
 
         self.colores = list()
-        self.ladoDeUnCuadrado = 0.5
+        self.ladoDeUnCuadrado = 1
         self.numero_de_divisiones = 70 #El video mostraba ~68
 
         self.label_2.setText('No se ha seleccionado ningún archivo')
@@ -66,18 +64,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.abrirDataset.clicked.connect(self.abrirArchivo)
         self.btnVerDataset.clicked.connect(self.graficarDataset)
 
-        self.btnEntrenar.clicked.connect(self.entrenarModelo)
         self.btnTest.clicked.connect(self.testearModelo)
         self.btnPredecirPunto.clicked.connect(self.predecirPunto)
         self.spinEntrenamiento.valueChanged.connect(self.cambiarPorcentajes)
 
         #Inicializar widgets
-
-    def entrenarModelo(self):
-        self.archivo.datosDeEntrenamiento(self.porcentajeEntrenamiento)
-        pyplot.plot(self.archivo.datosEntrenamientoX,self.archivo.datosEntrenamientoY,'go')
-        pyplot.show()
-        #TODO: actualizar con los nuevos datos
     def predecirPunto(self):
         #mipunto = [5.91,3.79]
 
@@ -147,6 +138,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.linePuntoX.setEnabled(True)
             self.linePuntoY.setEnabled(True)
             self.groupBox.setEnabled(True)
+            self.lineK.setText('7')
+
+            self.valorDeK = 7
 
             #print("datos del archivo")
             #print(self.archivo.datos)
@@ -167,10 +161,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.tableWidget.setItem(fila, columna, QTableWidgetItem((self.archivo.datos[fila][columna])))
 
         else:
-            self.label_2.setText("Archivo no encontrado")
-
+            self.label_2.setText("No se ha seleccionado ningún archivo")
+            self.groupBox.setEnabled(False)
+    def obtenerValorDeK(self):
+        return int(self.lineK.text())
+    def obtenerRejilla(self):
+        return (self.checkRejilla.isChecked())
     def insertarGrid(self,grafico,ejes,limiteInferiorX,limiteSuperiorX,limiteInferiorY,limiteSuperiorY,k,salto):
-        coordenadas = list()
+        #¶coordenadas = list()
         cuadrados = []
         x = limiteInferiorX
         y = limiteInferiorY
@@ -184,7 +182,36 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             while(x<limiteSuperiorX):
                 clase = predecirClase(self.datos.datosCompletos,(xDePrueba,yDePrueba),k)
                 color = self.diccionario[clase]
-                cuadrado = mpatches.Rectangle((x,y),self.ladoDeUnCuadrado,self.ladoDeUnCuadrado,angle = 0.0,color=color, alpha=0.5)
+                cuadrado = mpatches.Rectangle((x,y),self.ladoDeUnCuadrado,self.ladoDeUnCuadrado,angle = 0.0,color=color, alpha=0.4,linewidth=0)
+                #grafico.patches.extend([pyplot.Rectangle((x,y),saltoDelCuadrado,saltoDelCuadrado,
+                                  #fill=True, color=color, alpha=0.5, zorder=1000,
+                                  #transform=grafico.transFigure, figure=grafico)])
+                cuadrados.append(cuadrado)
+                ejes.add_patch(cuadrado)
+                x = x + self.ladoDeUnCuadrado
+                xDePrueba = x + self.ladoDeUnCuadrado/2
+            y = y + self.ladoDeUnCuadrado
+            yDePrueba = y + self.ladoDeUnCuadrado/2
+        #for c in cuadrados:
+            #print(str(c) + "/n")
+    def insertarCirculos(self,grafico,ejes,limiteInferiorX,limiteSuperiorX,limiteInferiorY,limiteSuperiorY,k,salto):
+        #coordenadas = list()
+        cuadrados = []
+        x = limiteInferiorX
+        y = limiteInferiorY
+        random.seed(datetime.datetime.now())
+
+        xDePrueba = x + self.ladoDeUnCuadrado/2
+        yDePrueba = y + self.ladoDeUnCuadrado/2
+        while(y<limiteSuperiorY):
+            x = limiteInferiorX
+            xDePrueba = x + self.ladoDeUnCuadrado/2
+            while(x<limiteSuperiorX):
+                clase = (predecirClaseConCalidad(self.datos.datosCompletos,(xDePrueba,yDePrueba),k))[0]
+                calidad = (predecirClaseConCalidad(self.datos.datosCompletos,(xDePrueba,yDePrueba),k))[1]
+                calidad = ((self.ladoDeUnCuadrado/2)*(calidad))
+                color = self.diccionario[clase]
+                cuadrado = mpatches.Circle((x+(self.ladoDeUnCuadrado/2),y+(self.ladoDeUnCuadrado/2)),radius=calidad,color=color, alpha=0.4,linewidth=0)
                 #grafico.patches.extend([pyplot.Rectangle((x,y),saltoDelCuadrado,saltoDelCuadrado,
                                   #fill=True, color=color, alpha=0.5, zorder=1000,
                                   #transform=grafico.transFigure, figure=grafico)])
@@ -221,12 +248,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         xDelBucle = limiteInferiorX
         yDelBucle = limiteInferiorY
-        while(xDelBucle<limiteSuperiorX):
-            pyplot.axvline(x = xDelBucle,linestyle = '-',marker = ",",linewidth=0.5)
-            xDelBucle = xDelBucle + self.ladoDeUnCuadrado
-        while(yDelBucle<limiteSuperiorY):
-            pyplot.axhline(y = yDelBucle,linestyle = '-',marker = ",",linewidth=0.5)
-            yDelBucle = yDelBucle + self.ladoDeUnCuadrado
+        
+        if(self.obtenerRejilla()):
+            while(xDelBucle<limiteSuperiorX):
+                pyplot.axvline(x = xDelBucle,linestyle = '-',marker = ",",linewidth=0.2)
+                xDelBucle = xDelBucle + self.ladoDeUnCuadrado
+            while(yDelBucle<limiteSuperiorY):
+                pyplot.axhline(y = yDelBucle,linestyle = '-',marker = ",",linewidth=0.2)
+                yDelBucle = yDelBucle + self.ladoDeUnCuadrado
 
         self.diccionario = {}
         i = 0
@@ -236,8 +265,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             i = i + 1
         for punto in self.datos.datosCompletos:
             pyplot.plot(punto[0],punto[1],marker = '.',color = self.diccionario[punto[2]])
-        k = 7
-        self.insertarGrid(grafico,ax,limiteInferiorX,limiteSuperiorX,limiteInferiorY,limiteSuperiorY,k,self.ladoDeUnCuadrado)
+        k = self.obtenerValorDeK()
+        if (self.radioCuadrado.isChecked()==True):
+            self.insertarGrid(grafico,ax,limiteInferiorX,limiteSuperiorX,limiteInferiorY,limiteSuperiorY,k,self.ladoDeUnCuadrado)
+        else:
+            self.insertarCirculos(grafico,ax,limiteInferiorX,limiteSuperiorX,limiteInferiorY,limiteSuperiorY,k,self.ladoDeUnCuadrado)
         #Crear cuadrados
         
         grafico.show()

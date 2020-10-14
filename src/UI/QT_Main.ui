@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
+    <width>1024</width>
     <height>600</height>
    </rect>
   </property>
@@ -19,7 +19,7 @@
      <rect>
       <x>10</x>
       <y>90</y>
-      <width>781</width>
+      <width>1001</width>
       <height>441</height>
      </rect>
     </property>
@@ -62,9 +62,9 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>60</y>
+       <y>80</y>
        <width>311</width>
-       <height>191</height>
+       <height>171</height>
       </rect>
      </property>
      <property name="title">
@@ -130,7 +130,7 @@
        <rect>
         <x>20</x>
         <y>90</y>
-        <width>171</width>
+        <width>281</width>
         <height>31</height>
        </rect>
       </property>
@@ -143,9 +143,9 @@
      <property name="geometry">
       <rect>
        <x>340</x>
-       <y>60</y>
-       <width>431</width>
-       <height>371</height>
+       <y>80</y>
+       <width>651</width>
+       <height>351</height>
       </rect>
      </property>
      <property name="title">
@@ -156,7 +156,7 @@
        <rect>
         <x>10</x>
         <y>20</y>
-        <width>411</width>
+        <width>631</width>
         <height>341</height>
        </rect>
       </property>
@@ -175,10 +175,10 @@
     <widget class="QPushButton" name="btnVerDataset">
      <property name="geometry">
       <rect>
-       <x>290</x>
-       <y>10</y>
-       <width>101</width>
-       <height>41</height>
+       <x>450</x>
+       <y>50</y>
+       <width>111</width>
+       <height>31</height>
       </rect>
      </property>
      <property name="text">
@@ -188,7 +188,7 @@
     <widget class="QLineEdit" name="linePuntoX">
      <property name="geometry">
       <rect>
-       <x>450</x>
+       <x>720</x>
        <y>10</y>
        <width>51</width>
        <height>31</height>
@@ -198,7 +198,7 @@
     <widget class="QLineEdit" name="linePuntoY">
      <property name="geometry">
       <rect>
-       <x>510</x>
+       <x>780</x>
        <y>10</y>
        <width>51</width>
        <height>31</height>
@@ -208,7 +208,7 @@
     <widget class="QPushButton" name="btnPredecirPunto">
      <property name="geometry">
       <rect>
-       <x>570</x>
+       <x>840</x>
        <y>10</y>
        <width>151</width>
        <height>31</height>
@@ -216,6 +216,68 @@
      </property>
      <property name="text">
       <string>Predecir clase del punto</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="radioCirculo">
+     <property name="geometry">
+      <rect>
+       <x>290</x>
+       <y>10</y>
+       <width>82</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Círculos</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="radioCuadrado">
+     <property name="geometry">
+      <rect>
+       <x>290</x>
+       <y>30</y>
+       <width>82</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Cuadrados</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="checkRejilla">
+     <property name="geometry">
+      <rect>
+       <x>450</x>
+       <y>30</y>
+       <width>101</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Dibujar rejilla</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="labelK">
+     <property name="geometry">
+      <rect>
+       <x>450</x>
+       <y>10</y>
+       <width>47</width>
+       <height>13</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Valor de K</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="lineK">
+     <property name="geometry">
+      <rect>
+       <x>510</x>
+       <y>10</y>
+       <width>51</width>
+       <height>20</height>
+      </rect>
      </property>
     </widget>
    </widget>
@@ -230,19 +292,6 @@
     </property>
     <property name="text">
      <string>Abrir Dataset</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="btnEntrenar">
-    <property name="geometry">
-     <rect>
-      <x>320</x>
-      <y>9</y>
-      <width>100</width>
-      <height>81</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Entrenar</string>
     </property>
    </widget>
    <widget class="QComboBox" name="comboSeparador">
@@ -274,7 +323,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>1024</width>
      <height>21</height>
     </rect>
    </property>
@@ -286,9 +335,9 @@
     <addaction name="separator"/>
     <addaction name="actionSalir"/>
    </widget>
-   <widget class="QMenu" name="menuEntrenar">
+   <widget class="QMenu" name="menuTest">
     <property name="title">
-     <string>Entrenar</string>
+     <string>Testear</string>
     </property>
    </widget>
    <widget class="QMenu" name="menuAyuda">
@@ -297,7 +346,7 @@
     </property>
    </widget>
    <addaction name="menuProyecto"/>
-   <addaction name="menuEntrenar"/>
+   <addaction name="menuTest"/>
    <addaction name="menuAyuda"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>

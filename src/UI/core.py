@@ -19,9 +19,22 @@ def prediccion(puntoTest,listadevecinos):
 	clase = masFrecuente(clases)	
 	return clase
 
+def prediccionConCalidad(puntoTest,listadevecinos):
+	clases = list()
+	for vecino in listadevecinos:
+		clases.append(vecino[0][-1])
+	clase = masFrecuente(clases)
+	
+	calidad = clases.count(clase)/len(clases)	
+	return ((clase,calidad))
+
 def masFrecuente(lista): 
     return max(set(lista), key = lista.count)
 
 def predecirClase(listaDePuntos,puntoTest,k):
 	loskvecinos = vecinos(listaDePuntos,puntoTest,k)
 	return prediccion(puntoTest,loskvecinos)
+
+def predecirClaseConCalidad(listaDePuntos,puntoTest,k):
+	loskvecinos = vecinos(listaDePuntos,puntoTest,k)
+	return prediccionConCalidad(puntoTest,loskvecinos)
