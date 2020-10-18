@@ -32,17 +32,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         #Inicializando botones y esas weas
         
-        self.btnVerDataset.setEnabled(False)
-        self.btnTest.setEnabled(False)
-        self.txtDebug.setReadOnly(True)
-        self.btnPredecirPunto.setEnabled(False)
-        self.spinEntrenamiento.setEnabled(False)
+        self.txtTest.setReadOnly(True)
+        self.txtMejorK.setReadOnly(True)
         self.labelTest_2.setText(str(30))
         self.spinEntrenamiento.setValue(70)
-        self.linePuntoX.setEnabled(False)
-        self.linePuntoY.setEnabled(False)
         self.groupBox.setEnabled(False)
         self.radioCuadrado.setChecked(True)
+        self.radioElbow.setChecked(True)
 
         self.comboSeparador.addItems([';',',','Tab','Espacio'])
 
@@ -50,33 +46,38 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.porcentajeEntrenamiento = 70
         self.porcentajeTest = 30
+        self.valorDeK = 1
 
         self.diccionario = {}
 
         #fecha = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
 
         self.colores = list()
-        self.ladoDeUnCuadrado = 1
+        self.ladoDeUnCuadrado = 0.5
         self.numero_de_divisiones = 70 #El video mostraba ~68
 
         self.label_2.setText('No se ha seleccionado ningún archivo')
 
         self.abrirDataset.clicked.connect(self.abrirArchivo)
-        self.btnVerDataset.clicked.connect(self.graficarDataset)
 
-        self.btnTest.clicked.connect(self.testearModelo)
+        self.btnTestUsuario.clicked.connect(self.testearModeloUsuario)
+        self.btnGraficoUsuario.clicked.connect(self.graficarDataset)
+
+        self.btnTestMetodo.clicked.connect(self.testearModeloMetodo)
+        self.btnGraficoMetodo.clicked.connect(self.graficarDataset)
+
         self.btnPredecirPunto.clicked.connect(self.predecirPunto)
+        
         self.spinEntrenamiento.valueChanged.connect(self.cambiarPorcentajes)
 
         #Inicializar widgets
     def predecirPunto(self):
-        #mipunto = [5.91,3.79]
+        self.txtTest.clear()
 
         mipunto = list()
         mipunto.append(float(self.linePuntoX.text()))
         mipunto.append(float(self.linePuntoY.text()))
         
-        self.datos.aleatorizar()
         #puntosDeEntrenamiento = self.datos.obtenerDatosEntrenamiento(self.porcentajeEntrenamiento)
         #puntosDeTest = self.datos.obtenerDatosTest(self.porcentajeEntrenamiento)
         for i in range(1,11):
@@ -85,20 +86,37 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #print(loskvecinos)
             claseDelPunto = prediccion (mipunto,loskvecinos)
             #print("La clase predicha fue " + claseDelPunto)
-            self.txtDebug.insertPlainText("Con " +str(i) + " vecinos, la clase predicha fue " + claseDelPunto + "\n")
+            self.txtTest.insertPlainText("Con " +str(i) + " vecinos, la clase predicha fue " + claseDelPunto + "\n")
         #self.archivo.datosDeEntrenamiento(self.porcentajeEntrenamiento)
         #pyplot.plot(self.archivo.datosEntrenamientoX,self.archivo.datosEntrenamientoY,'go')
         #pyplot.show()
-    def testearModelo(self):
-        self.txtDebug.clear()
-        self.datos.aleatorizar()
-        #print(self.datos.datosCompletos)
+    def testearModeloMetodo(self):
+        self.txtMejorK.clear()
+        puntosDeEntrenamiento = self.datos.obtenerDatosEntrenamiento(self.porcentajeEntrenamiento)
+        puntosDeTest = self.datos.obtenerDatosTest(self.porcentajeEntrenamiento)
+
+        resultados = list()
+        aciertos = 0
+        totalElementos = 0
+        k = self.obtenerMejorK()
+        for puntoDeTest in puntosDeTest:
+            loskvecinos = vecinos(puntosDeEntrenamiento,puntoDeTest,k)
+            claseDelPunto = prediccion (puntoDeTest,loskvecinos)
+            totalElementos = totalElementos + 1
+            if (claseDelPunto==puntoDeTest[-1]):
+                aciertos = aciertos + 1
+        porcentajeDeAciertos = (aciertos / totalElementos) * 100
+        resultados.append((k,porcentajeDeAciertos))
+        for resultado in resultados:
+            self.txtMejorK.insertPlainText("Con K = " + str(resultado[0]) + ", la eficacia fue de " + "{:.2f}".format(resultado[1]) + "% \n")
+    def testearModeloUsuario(self):
+        self.txtTest.clear()
         puntosDeEntrenamiento = self.datos.obtenerDatosEntrenamiento(self.porcentajeEntrenamiento)
         puntosDeTest = self.datos.obtenerDatosTest(self.porcentajeEntrenamiento)
 
         resultados = list()
 
-        for i in range(1,11):
+        for i in range(1,self.obtenerValorDeK()+1):
             aciertos = 0
             totalElementos = 0
             #TODO: mostrar en una tabla los resultados, por ejemplo
@@ -113,7 +131,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             porcentajeDeAciertos = (aciertos / totalElementos) * 100
             resultados.append((i,porcentajeDeAciertos))
         for resultado in resultados:
-            self.txtDebug.insertPlainText("Para un k = " + str(resultado[0]) + " el porcentaje de aciertos fue de " + "{:.2f}".format(resultado[1]) + "% \n")
+            self.txtTest.insertPlainText("Con K = " + str(resultado[0]) + ", la eficacia fue de " + "{:.2f}".format(resultado[1]) + "% \n")
         #self.archivo.datosDeEntrenamiento(self.porcentajeEntrenamiento)
         #pyplot.plot(self.archivo.datosEntrenamientoX,self.archivo.datosEntrenamientoY,'go')
         #pyplot.show()
@@ -123,6 +141,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.porcentajeTest = 100 - self.spinEntrenamiento.value()
         self.labelTest_2.setText(str(self.porcentajeTest))
 
+    def cambiarKUsuario(self):
+        self.valorDeK = self.spinKUsuario.value()
+
     def abrirArchivo(self):
         options = QFileDialog.Options()
         ruta_de_archivo, _ = QFileDialog.getOpenFileName(self, "Abrir Dataset", "",
@@ -131,14 +152,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.label_2.setText(ruta_de_archivo)
             self.archivo = Archivo(ruta_de_archivo)
             self.archivo.abrir(self.separadores[self.comboSeparador.currentText()])
-            self.btnVerDataset.setEnabled(True)
-            self.btnTest.setEnabled(True)
-            self.btnPredecirPunto.setEnabled(True)
-            self.spinEntrenamiento.setEnabled(True)
-            self.linePuntoX.setEnabled(True)
-            self.linePuntoY.setEnabled(True)
             self.groupBox.setEnabled(True)
-            self.lineK.setText('7')
 
             self.valorDeK = 7
 
@@ -164,7 +178,31 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.label_2.setText("No se ha seleccionado ningún archivo")
             self.groupBox.setEnabled(False)
     def obtenerValorDeK(self):
-        return int(self.lineK.text())
+        return int(self.spinKUsuario.value())
+    def obtenerMejorK(self):
+        if (self.radioRaiz.isChecked()):
+            return self.calcularKRaiz()
+        else:
+            return self.calcularKElbow()
+
+    def calcularKRaiz(self):
+        return self.datos.obtenerCantidad()
+    def calcularKElbow(self):
+        #
+        #
+        #
+        #
+        #
+        #
+        #
+        #
+        #
+        #
+        #
+        #
+        #
+        #
+        return 5
     def obtenerRejilla(self):
         return (self.checkRejilla.isChecked())
     def insertarGrid(self,grafico,ejes,limiteInferiorX,limiteSuperiorX,limiteInferiorY,limiteSuperiorY,k,salto):

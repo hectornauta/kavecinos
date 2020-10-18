@@ -1,5 +1,5 @@
 import random
-
+from math import sqrt
 class Datos():
     def __init__(self):
         self.datosCompletos = list()
@@ -21,6 +21,7 @@ class Datos():
         for dato in self.datosCompletos:
             self.clases.append(dato[2])
         self.clases = list(dict.fromkeys(self.clases))
+        self.aleatorizar()
     def minX(self):
         return(min(self.x))
     def maxX(self):
@@ -37,3 +38,5 @@ class Datos():
     def obtenerDatosTest(self,porcentajeEntrenamiento):
         self.datosTest = self.datosCompletos[(int((len(self.datosCompletos)*porcentajeEntrenamiento)/100)):]
         return self.datosTest
+    def obtenerCantidad(self):
+        return int(sqrt(len(self.datosCompletos)))
