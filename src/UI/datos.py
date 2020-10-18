@@ -40,3 +40,5 @@ class Datos():
         return self.datosTest
     def obtenerCantidad(self):
         return int(sqrt(len(self.datosCompletos)))
+    def obtenerNumeroDeClases(self):
+        return len(self.clases)

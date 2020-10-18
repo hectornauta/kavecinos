@@ -36,6 +36,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.txtMejorK.setReadOnly(True)
         self.labelTest_2.setText(str(30))
         self.spinEntrenamiento.setValue(70)
+        self.spinKUsuario.setValue(10)
         self.groupBox.setEnabled(False)
         self.radioCuadrado.setChecked(True)
         self.radioElbow.setChecked(True)
@@ -46,9 +47,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.porcentajeEntrenamiento = 70
         self.porcentajeTest = 30
-        self.valorDeK = 1
 
         self.diccionario = {}
+        self.datos = None
 
         #fecha = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
 
@@ -61,10 +62,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.abrirDataset.clicked.connect(self.abrirArchivo)
 
         self.btnTestUsuario.clicked.connect(self.testearModeloUsuario)
-        self.btnGraficoUsuario.clicked.connect(self.graficarDataset)
-
+        self.btnGraficoUsuario.clicked.connect(self.graficarUsuario)
         self.btnTestMetodo.clicked.connect(self.testearModeloMetodo)
-        self.btnGraficoMetodo.clicked.connect(self.graficarDataset)
+        self.btnGraficoMetodo.clicked.connect(self.graficarMetodo)
 
         self.btnPredecirPunto.clicked.connect(self.predecirPunto)
         
@@ -153,6 +153,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.archivo = Archivo(ruta_de_archivo)
             self.archivo.abrir(self.separadores[self.comboSeparador.currentText()])
             self.groupBox.setEnabled(True)
+            self.txtTest.clear()
+            self.txtMejorK.clear()
 
             self.valorDeK = 7
 
@@ -186,23 +188,49 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return self.calcularKElbow()
 
     def calcularKRaiz(self):
-        return self.datos.obtenerCantidad()
+        k = self.datos.obtenerCantidad()
+        if (((k % 2) == 0) and (((self.datos.obtenerNumeroDeClases())%2)==0)):
+            k = k + 1
+        return k
     def calcularKElbow(self):
-        #
-        #
-        #
-        #
-        #
-        #
-        #
-        #
-        #
-        #
-        #
-        #
-        #
-        #
-        return 5
+        self.txtMejorK.clear()
+        puntosDeEntrenamiento = self.datos.obtenerDatosEntrenamiento(self.porcentajeEntrenamiento)
+        puntosDeTest = self.datos.obtenerDatosTest(self.porcentajeEntrenamiento)
+
+        resultados = list()
+        aciertos = 0
+        totalElementos = 0
+        k = 1
+        mejorK = 1
+        fin = False
+        mejorValor = 0
+        j = 0
+
+        while (not fin):
+            aciertos = 0
+            totalElementos = 0
+            for puntoDeTest in puntosDeTest:
+                loskvecinos = vecinos(puntosDeEntrenamiento,puntoDeTest,k)
+                claseDelPunto = prediccion (puntoDeTest,loskvecinos)
+                totalElementos = totalElementos + 1
+                if (claseDelPunto==puntoDeTest[-1]):
+                    aciertos = aciertos + 1
+            porcentajeDeAciertos = (aciertos / totalElementos) * 100
+            resultados.append((k,porcentajeDeAciertos))
+            if (porcentajeDeAciertos>mejorValor):
+                mejorValor = porcentajeDeAciertos
+                mejorK = k
+                j = 0
+            else:
+                j = j + 1
+            if ((j>2) or (porcentajeDeAciertos==100) or (k>30)):
+                fin = True
+            else:
+                k = k + 1           
+        for resultado in resultados:
+            self.txtMejorK.insertPlainText("Con K = " + str(resultado[0]) + ", la eficacia fue de " + "{:.2f}".format(resultado[1]) + "% \n")
+        self.txtMejorK.insertPlainText("Se ha detectado un k óptimo igual a " + str(mejorK) + "\n ------------- \n")
+        return mejorK
     def obtenerRejilla(self):
         return (self.checkRejilla.isChecked())
     def insertarGrid(self,grafico,ejes,limiteInferiorX,limiteSuperiorX,limiteInferiorY,limiteSuperiorY,k,salto):
@@ -261,7 +289,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             yDePrueba = y + self.ladoDeUnCuadrado/2
         #for c in cuadrados:
             #print(str(c) + "/n")
-    def graficarDataset(self):
+    def graficarMetodo(self):
+        k = self.obtenerValorDeK()
+        self.graficarDataset(k)
+    def graficarUsuario(self):
+        k = self.obtenerMejorK()
+        self.graficarDataset(k)
+
+    def graficarDataset(self,k):
         valorDeSeparacionX = (self.datos.maxX()-self.datos.minX())*0.1
         valorDeSeparacionY = (self.datos.maxY()-self.datos.minY())*0.1
         limiteInferiorX = self.datos.minX() - valorDeSeparacionX
@@ -303,7 +338,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             i = i + 1
         for punto in self.datos.datosCompletos:
             pyplot.plot(punto[0],punto[1],marker = '.',color = self.diccionario[punto[2]])
-        k = self.obtenerValorDeK()
         if (self.radioCuadrado.isChecked()==True):
             self.insertarGrid(grafico,ax,limiteInferiorX,limiteSuperiorX,limiteInferiorY,limiteSuperiorY,k,self.ladoDeUnCuadrado)
         else:
