@@ -31,6 +31,8 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
+import time
+
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self, *args, **kwargs):
         QtWidgets.QMainWindow.__init__(self, *args, **kwargs)
@@ -61,6 +63,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.diccionario = {}
         self.datos = None
+        self.resultadosTestMetodo = list()
+        self.resultadosTestUsuario = list()
 
         #fecha = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
 
@@ -82,8 +86,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.spinEntrenamiento.valueChanged.connect(self.cambiarPorcentajes)
 
         #Inicializar widgets
-    def progress_fn(self, n):
-        print("%d%% done" % n)
+    def progress_fn(self,n):
+        self.barraProgreso.setValue(n)
+        print('cosas')
     def execute_this_fn(self, progress_callback):
         for n in range(0, 5):
             time.sleep(1)
@@ -95,6 +100,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
     def thread_complete(self):
         print("THREAD COMPLETE!")
+        for resultado in self.resultadosTestUsuario:
+            self.txtTest.insertPlainText("Con K = " + str(resultado[0]) + ", la eficacia fue de " + "{:.2f}".format(resultado[1]) + "% \n")
+
     #☺def recurring_timer(self):
         #self.counter +=1
         #self.l.setText("Counter: %d" % self.counter)
@@ -138,11 +146,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         for resultado in resultados:
             self.txtMejorK.insertPlainText("Con K = " + str(resultado[0]) + ", la eficacia fue de " + "{:.2f}".format(resultado[1]) + "% \n")
     def hiloTestearModeloUsuario(self,progress_callback):
-        self.txtTest.clear()
         puntosDeEntrenamiento = self.datos.obtenerDatosEntrenamiento(self.porcentajeEntrenamiento)
         puntosDeTest = self.datos.obtenerDatosTest(self.porcentajeEntrenamiento)
 
-        resultados = list()
+        self.resultadosTestUsuario = list()
         k = self.obtenerValorDeK()+1
         for i in range(1,k + 1):
             aciertos = 0
@@ -157,17 +164,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 if (claseDelPunto==puntoDeTest[-1]):
                     aciertos = aciertos + 1
             porcentajeDeAciertos = (aciertos / totalElementos) * 100
-            resultados.append((i,porcentajeDeAciertos))
-            progress_callback.emit(int((i*100)/k))
-            self.barraProgreso.setValue(int((i*100)/k))
-        for resultado in resultados:
-            self.txtTest.insertPlainText("Con K = " + str(resultado[0]) + ", la eficacia fue de " + "{:.2f}".format(resultado[1]) + "% \n")
+            self.resultadosTestUsuario.append((i,porcentajeDeAciertos))
+            #self.progress_fn(i,k)
+            n = int((i*100)/k)
+            progress_callback.emit(n)
+        #for resultado in resultados:
+            #self.txtTest.insertPlainText("Con K = " + str(resultado[0]) + ", la eficacia fue de " + "{:.2f}".format(resultado[1]) + "% \n")
             #TODO: esto no debería pasar porque están en hilos distintos
         #self.archivo.datosDeEntrenamiento(self.porcentajeEntrenamiento)
         #pyplot.plot(self.archivo.datosEntrenamientoX,self.archivo.datosEntrenamientoY,'go')
         #pyplot.show()
     def testearModeloUsuario(self):
-        # Pass the function to execute
+        self.txtTest.clear()
+        self.barraProgreso.setValue(0)
         worker = Worker(self.hiloTestearModeloUsuario) # Any other args, kwargs are passed to the run function
         worker.signals.result.connect(self.print_output)
         worker.signals.finished.connect(self.thread_complete)
@@ -334,10 +343,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #for c in cuadrados:
             #print(str(c) + "/n")
     def graficarMetodo(self):
-        k = self.obtenerValorDeK()
+        k = self.obtenerMejorK()
         self.graficarDataset(k)
     def graficarUsuario(self):
-        k = self.obtenerMejorK()
+        k = self.obtenerValorDeK()
         self.graficarDataset(k)
 
     def graficarDataset(self,k):
