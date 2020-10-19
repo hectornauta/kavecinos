@@ -162,6 +162,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.barraProgreso.setValue(int((i*100)/k))
         for resultado in resultados:
             self.txtTest.insertPlainText("Con K = " + str(resultado[0]) + ", la eficacia fue de " + "{:.2f}".format(resultado[1]) + "% \n")
+            #TODO: esto no debería pasar porque están en hilos distintos
         #self.archivo.datosDeEntrenamiento(self.porcentajeEntrenamiento)
         #pyplot.plot(self.archivo.datosEntrenamientoX,self.archivo.datosEntrenamientoY,'go')
         #pyplot.show()
