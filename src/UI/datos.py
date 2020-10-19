@@ -1,5 +1,4 @@
 import random
-from math import sqrt
 class Datos():
     def __init__(self):
         self.datosCompletos = list()
@@ -39,6 +38,6 @@ class Datos():
         self.datosTest = self.datosCompletos[(int((len(self.datosCompletos)*porcentajeEntrenamiento)/100)):]
         return self.datosTest
     def obtenerCantidad(self):
-        return int(sqrt(len(self.datosCompletos)))
+        return (len(self.datosCompletos))
     def obtenerNumeroDeClases(self):
         return len(self.clases)

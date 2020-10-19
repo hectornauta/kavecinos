@@ -23,7 +23,13 @@ import matplotlib.patches as mpatches
 from QT_Main_UI import *
 
 import random
+from math import sqrt
 
+from hilos import Worker
+from hilos import WorkerSignals
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self, *args, **kwargs):
@@ -31,15 +37,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.setupUi(self)
 
         #Inicializando botones y esas weas
+        self.threadpool = QThreadPool()
         
         self.txtTest.setReadOnly(True)
         self.txtMejorK.setReadOnly(True)
+        self.lineElementos.setReadOnly(True)
+        self.lineClases.setReadOnly(True)
         self.labelTest_2.setText(str(30))
         self.spinEntrenamiento.setValue(70)
         self.spinKUsuario.setValue(10)
         self.groupBox.setEnabled(False)
         self.radioCuadrado.setChecked(True)
         self.radioElbow.setChecked(True)
+        self.btnDetener.setEnabled(False)
+        self.barraProgreso.setEnabled(False)
 
         self.comboSeparador.addItems([';',',','Tab','Espacio'])
 
@@ -71,6 +82,23 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.spinEntrenamiento.valueChanged.connect(self.cambiarPorcentajes)
 
         #Inicializar widgets
+    def progress_fn(self, n):
+        print("%d%% done" % n)
+    def execute_this_fn(self, progress_callback):
+        for n in range(0, 5):
+            time.sleep(1)
+            progress_callback.emit(n*100/4)
+            
+        return "Done."
+    def print_output(self, s):
+        print(s)
+        
+    def thread_complete(self):
+        print("THREAD COMPLETE!")
+    #☺def recurring_timer(self):
+        #self.counter +=1
+        #self.l.setText("Counter: %d" % self.counter)
+
     def predecirPunto(self):
         self.txtTest.clear()
 
@@ -109,14 +137,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         resultados.append((k,porcentajeDeAciertos))
         for resultado in resultados:
             self.txtMejorK.insertPlainText("Con K = " + str(resultado[0]) + ", la eficacia fue de " + "{:.2f}".format(resultado[1]) + "% \n")
-    def testearModeloUsuario(self):
+    def hiloTestearModeloUsuario(self,progress_callback):
         self.txtTest.clear()
         puntosDeEntrenamiento = self.datos.obtenerDatosEntrenamiento(self.porcentajeEntrenamiento)
         puntosDeTest = self.datos.obtenerDatosTest(self.porcentajeEntrenamiento)
 
         resultados = list()
-
-        for i in range(1,self.obtenerValorDeK()+1):
+        k = self.obtenerValorDeK()+1
+        for i in range(1,k + 1):
             aciertos = 0
             totalElementos = 0
             #TODO: mostrar en una tabla los resultados, por ejemplo
@@ -130,12 +158,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     aciertos = aciertos + 1
             porcentajeDeAciertos = (aciertos / totalElementos) * 100
             resultados.append((i,porcentajeDeAciertos))
+            progress_callback.emit(int((i*100)/k))
+            self.barraProgreso.setValue(int((i*100)/k))
         for resultado in resultados:
             self.txtTest.insertPlainText("Con K = " + str(resultado[0]) + ", la eficacia fue de " + "{:.2f}".format(resultado[1]) + "% \n")
         #self.archivo.datosDeEntrenamiento(self.porcentajeEntrenamiento)
         #pyplot.plot(self.archivo.datosEntrenamientoX,self.archivo.datosEntrenamientoY,'go')
         #pyplot.show()
-        
+    def testearModeloUsuario(self):
+        # Pass the function to execute
+        worker = Worker(self.hiloTestearModeloUsuario) # Any other args, kwargs are passed to the run function
+        worker.signals.result.connect(self.print_output)
+        worker.signals.finished.connect(self.thread_complete)
+        worker.signals.progress.connect(self.progress_fn)
+        # Execute
+        self.threadpool.start(worker)        
     def cambiarPorcentajes(self):
         self.porcentajeEntrenamiento = self.spinEntrenamiento.value()
         self.porcentajeTest = 100 - self.spinEntrenamiento.value()
@@ -153,6 +190,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.archivo = Archivo(ruta_de_archivo)
             self.archivo.abrir(self.separadores[self.comboSeparador.currentText()])
             self.groupBox.setEnabled(True)
+            self.btnDetener.setEnabled(True)
+            self.barraProgreso.setEnabled(True)
             self.txtTest.clear()
             self.txtMejorK.clear()
 
@@ -170,6 +209,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.tableWidget.setColumnCount(self.archivo.numcolumnas)
             self.tableWidget.setRowCount(self.archivo.numfilas)
             self.tableWidget.setHorizontalHeaderLabels(self.archivo.columnas)
+            self.lineClases.setText(str(self.datos.obtenerNumeroDeClases()))
+            self.lineElementos.setText(str(self.datos.obtenerCantidad()))
 
             
             for fila in range(self.archivo.numfilas):
@@ -179,6 +220,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             self.label_2.setText("No se ha seleccionado ningún archivo")
             self.groupBox.setEnabled(False)
+            self.btnDetener.setEnabled(False)
+            self.barraProgreso.setEnabled(False)
     def obtenerValorDeK(self):
         return int(self.spinKUsuario.value())
     def obtenerMejorK(self):
@@ -188,7 +231,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return self.calcularKElbow()
 
     def calcularKRaiz(self):
-        k = self.datos.obtenerCantidad()
+        k = int(sqrt(self.datos.obtenerCantidad()))
         if (((k % 2) == 0) and (((self.datos.obtenerNumeroDeClases())%2)==0)):
             k = k + 1
         return k

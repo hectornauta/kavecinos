@@ -392,6 +392,52 @@
       </property>
      </widget>
     </widget>
+    <widget class="QLabel" name="labelElementos">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>60</y>
+       <width>121</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Cantidad de elementos</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="labelClases">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>90</y>
+       <width>111</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Cantidad de clases</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="lineElementos">
+     <property name="geometry">
+      <rect>
+       <x>170</x>
+       <y>60</y>
+       <width>111</width>
+       <height>20</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="lineClases">
+     <property name="geometry">
+      <rect>
+       <x>170</x>
+       <y>90</y>
+       <width>113</width>
+       <height>20</height>
+      </rect>
+     </property>
+    </widget>
    </widget>
    <widget class="QPushButton" name="abrirDataset">
     <property name="geometry">
@@ -427,6 +473,32 @@
     </property>
     <property name="text">
      <string>Separador</string>
+    </property>
+   </widget>
+   <widget class="QProgressBar" name="barraProgreso">
+    <property name="geometry">
+     <rect>
+      <x>450</x>
+      <y>10</y>
+      <width>151</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="value">
+     <number>0</number>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btnDetener">
+    <property name="geometry">
+     <rect>
+      <x>350</x>
+      <y>10</y>
+      <width>71</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Detener</string>
     </property>
    </widget>
   </widget>
