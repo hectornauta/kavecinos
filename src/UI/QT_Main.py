@@ -27,9 +27,13 @@ from math import sqrt
 
 from hilos import Worker
 from hilos import WorkerSignals
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
+
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import QObject, QRunnable, QThreadPool,pyqtSlot, pyqtSignal
+
+#from PyQt5.QtGui import *
+#from PyQt5.QtWidgets import *
+#from PyQt5.QtCore import *
 
 import time
 
@@ -88,7 +92,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #Inicializar widgets
     def progress_fn(self,n):
         self.barraProgreso.setValue(n)
-        print('cosas')
+        #print('cosas')
     def execute_this_fn(self, progress_callback):
         for n in range(0, 5):
             time.sleep(1)
@@ -96,7 +100,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             
         return "Done."
     def print_output(self, s):
-        print(s)
+        print('')
         
     def thread_complete(self):
         print("THREAD COMPLETE!")

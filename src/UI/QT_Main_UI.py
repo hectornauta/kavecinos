@@ -93,7 +93,7 @@ class Ui_MainWindow(object):
         self.spinKUsuario = QtWidgets.QSpinBox(self.grupoTestUsuario)
         self.spinKUsuario.setGeometry(QtCore.QRect(160, 20, 42, 22))
         self.spinKUsuario.setMinimum(1)
-        self.spinKUsuario.setMaximum(20)
+        self.spinKUsuario.setMaximum(100)
         self.spinKUsuario.setObjectName("spinKUsuario")
         self.labelKTest = QtWidgets.QLabel(self.grupoTestUsuario)
         self.labelKTest.setGeometry(QtCore.QRect(10, 20, 131, 31))
