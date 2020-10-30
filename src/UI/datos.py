@@ -4,7 +4,7 @@ class Datos():
         self.datosCompletos = list()
         self.clases = list()
         self.puntos = list()
-
+        self.atributos = list()
         self.datosEntrenamiento = list()
         self.datosTest = list()
         self.x = list()

@@ -19,6 +19,8 @@ from PyQt5.QtWidgets import QTableWidgetItem
 from matplotlib import pyplot
 from matplotlib import colors
 import matplotlib.patches as mpatches
+from matplotlib.lines import Line2D
+
 
 from QT_Main_UI import *
 
@@ -252,6 +254,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.porcentajeEntrenamiento = self.spinEntrenamiento.value()
         self.porcentajeTest = 100 - self.spinEntrenamiento.value()
         self.labelTest_2.setText(str(self.porcentajeTest))
+        self.btnGraficoMetodo.setEnabled(False)
 
     def cambiarKUsuario(self):
         self.valorDeK = self.spinKUsuario.value()
@@ -275,7 +278,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #print("datos del archivo")
             #print(self.archivo.datos)
             self.datos = Datos()
-
+            self.datos.atributos = self.archivo.columnas
             self.datos.generar(deepcopy(self.archivo.datos))
 
             #print("datos del archivo")
@@ -456,6 +459,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         pyplot.xlim(limiteInferiorX,limiteSuperiorX)
         pyplot.ylim(limiteInferiorY,limiteSuperiorY)
 
+        pyplot.xlabel(self.datos.atributos[0])
+        pyplot.ylabel(self.datos.atributos[1])
+
         xDelBucle = limiteInferiorX
         yDelBucle = limiteInferiorY
         
@@ -473,8 +479,26 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         for clase in self.datos.clases:
             self.diccionario[clase] = lista[i][0]
             i = i + 1
-        for punto in self.datos.datosCompletos:
+
+        
+        puntosEntrenamiento = self.datos.obtenerDatosEntrenamiento(self.porcentajeEntrenamiento)
+
+        for punto in puntosEntrenamiento:
             pyplot.plot(punto[0],punto[1],marker = '.',color = self.diccionario[punto[2]])
+            
+
+
+
+        leyendas = []
+        for clase in self.datos.clases:
+            leyendas.append(Line2D([0],[0],lw=4,marker='o',color=self.diccionario[clase]))
+        pyplot.legend(leyendas, self.datos.clases)
+
+
+
+
+
+
         if (self.radioCuadrado.isChecked()==True):
             self.insertarGrid(grafico,ax,limiteInferiorX,limiteSuperiorX,limiteInferiorY,limiteSuperiorY,k,self.obtenerCelda())
         else:
@@ -482,6 +506,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #Crear cuadrados
         
         grafico.show()
+        coso = grafico.savefig('iamge.png')
+        print(type(coso))
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
