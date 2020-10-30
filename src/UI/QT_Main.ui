@@ -129,8 +129,8 @@
      <widget class="QCheckBox" name="checkRejilla">
       <property name="geometry">
        <rect>
-        <x>140</x>
-        <y>30</y>
+        <x>10</x>
+        <y>20</y>
         <width>101</width>
         <height>17</height>
        </rect>
@@ -163,6 +163,42 @@
       </property>
       <property name="text">
        <string>Cuadrados</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkRA">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>40</y>
+        <width>171</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Activar relación de aspecto 1:1</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkCelda">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>60</y>
+        <width>161</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Lado de celda personalizado</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineCelda">
+      <property name="geometry">
+       <rect>
+        <x>170</x>
+        <y>60</y>
+        <width>31</width>
+        <height>20</height>
+       </rect>
       </property>
      </widget>
     </widget>

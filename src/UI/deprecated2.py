@@ -30,8 +30,7 @@ from hilos import WorkerSignals
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QObject, QRunnable, QThreadPool,pyqtSlot, pyqtSignal
-from PyQt5.QtCore import QRegExp
-from PyQt5.QtGui import QRegExpValidator
+
 #from PyQt5.QtGui import *
 #from PyQt5.QtWidgets import *
 #from PyQt5.QtCore import *
@@ -58,23 +57,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.radioElbow.setChecked(True)
         self.btnDetener.setEnabled(False)
         self.barraProgreso.setEnabled(False)
-        self.btnGraficoMetodo.setEnabled(False)
-        self.checkRA.setChecked(True)
-        self.checkCelda.setChecked(False)
-        self.lineCelda.setEnabled(False)
-        self.lineCelda.setText('0.5')
 
-        rx = QRegExp("[0-9]\.?[0-9]*")
-        validator = QRegExpValidator(rx, self)
-        self.lineCelda.setValidator(validator)
-
-        
-        rx2 = QRegExp("[+-]?[0-9]*\.[0-9]*")
-        validator2 = QRegExpValidator(rx2, self)
-        self.linePuntoX.setValidator(validator2)
-        self.linePuntoY.setValidator(validator2)
-
-        
         self.comboSeparador.addItems([';',',','Tab','Espacio'])
 
         self.separadores = {',':',',';':';','Tab':'\t','Espacio':' '}
@@ -92,10 +75,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.colores = list()
         self.ladoDeUnCuadrado = 0.5
         self.numero_de_divisiones = 70 #El video mostraba ~68
-        self.kRaiz = 1
-        self.kMetodo = 1
-        self.laRaiz = False
-        self.elMetodo = True
+        self.kDeTest = 1
 
         self.label_2.setText('No se ha seleccionado ningún archivo')
 
@@ -109,20 +89,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.btnPredecirPunto.clicked.connect(self.predecirPunto)
         
         self.spinEntrenamiento.valueChanged.connect(self.cambiarPorcentajes)
-        self.radioRaiz.toggled.connect(self.activarRaiz)
-        self.radioElbow.toggled.connect(self.activarMetodo)
-        self.checkCelda.stateChanged.connect(self.verCelda)
-    def verCelda(self):
-        self.lineCelda.setEnabled(self.checkCelda.isChecked())
-        if self.checkCelda.isChecked():
-            self.lineCelda.setText("0.5")
-        
-    def activarMetodo(self):
-        self.laRaiz = False
-        self.elMetodo = True
-    def activarRaiz(self):
-        self.laRaiz = True
-        self.elMetodo = False
+
+        #Inicializar widgets
     def progress_fn(self,n):
         self.barraProgreso.setValue(n)
     def execute_this_fn(self, progress_callback):
@@ -152,10 +120,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.resultadosTestMetodo = list()
         aciertos = 0
         totalElementos = 0
-        if self.laRaiz:
-            k = self.kRaiz
-        else:
-            k = self.kMetodo
+        k = self.kDeTest
         total = len(puntosDeTest)
         for puntoDeTest in puntosDeTest:
             loskvecinos = vecinos(puntosDeEntrenamiento,puntoDeTest,k)
@@ -172,18 +137,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def testearModeloMetodo(self):
         self.txtMejorK.clear()
         self.barraProgreso.setValue(0)
-        if self.laRaiz:
-            self.kRaiz = self.calcularKRaiz()
-            self.continuar()
-        else:
-            worker1 = Worker(self.hiloCalcularKElbow) # Any other args, kwargs are passed to the run function
-            worker1.signals.result.connect(self.print_output)
-            worker1.signals.finished.connect(self.finCalcularKElbow)
-            worker1.signals.finished.connect(self.continuar)
-            worker1.signals.progress.connect(self.progresoCalcularKElbow)
-            self.threadpool.start(worker1)
-    def continuar(self):
-        self.btnGraficoMetodo.setEnabled(True)
+        self.kDeTest = self.obtenerMejorK()
         worker = Worker(self.hiloTestearModeloMetodo) # Any other args, kwargs are passed to the run function
         worker.signals.result.connect(self.print_output)
         worker.signals.finished.connect(self.finTestMetodo)
@@ -312,9 +266,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         return k
 
     def finCalcularKElbow(self):
-        self.txtMejorK.insertPlainText("Se ha detectado un k óptimo igual a " + str(self.kMetodo) + "\n ------------- \n")
+        self.txtMejorK.insertPlainText("Se ha detectado un k óptimo igual a " + str(self.kDeTest) + "\n ------------- \n")
     def progresoCalcularKElbow(self,n):
         self.txtMejorK.insertPlainText('Analizando K = ' + str(n) + "\n")
+    def calcularKElbow(self):
+        self.txtMejorK.clear()
+        worker = Worker(self.hiloCalcularKElbow) # Any other args, kwargs are passed to the run function
+        worker.signals.result.connect(self.print_output)
+        worker.signals.finished.connect(self.finCalcularKElbow)
+        worker.signals.progress.connect(self.progresoCalcularKElbow)
+        # Execute
+        self.threadpool.start(worker) 
     def hiloCalcularKElbow(self,progress_callback):
         puntosDeEntrenamiento = self.datos.obtenerDatosEntrenamiento(self.porcentajeEntrenamiento)
         puntosDeTest = self.datos.obtenerDatosTest(self.porcentajeEntrenamiento)
@@ -352,20 +314,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 k = k + 1           
         #for resultado in resultados:
             #self.txtMejorK.insertPlainText("Con K = " + str(resultado[0]) + ", la eficacia fue de " + "{:.2f}".format(resultado[1]) + "% \n")
-        self.kMetodo = mejorK
+        self.kDeTest = mejorK
+        return mejorK
     def obtenerRejilla(self):
         return (self.checkRejilla.isChecked())
-    def obtenerRA(self):
-        if self.checkRA.isChecked():
-            return True
-        else:
-            return False
-        return (self.checkRejilla.isChecked())
-    def obtenerCelda(self):
-        if (self.checkCelda.isChecked() and (0<float(self.lineCelda.text()))):
-            return float(self.lineCelda.text())
-        else:
-            return 0.5
     def insertarGrid(self,grafico,ejes,limiteInferiorX,limiteSuperiorX,limiteInferiorY,limiteSuperiorY,k,salto):
         #¶coordenadas = list()
         cuadrados = []
@@ -423,10 +375,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #for c in cuadrados:
             #print(str(c) + "/n")
     def graficarMetodo(self):
-        if self.laRaiz:
-            k = self.kRaiz
-        else:
-            k = self.kMetodo
+        k = self.obtenerMejorK()
         self.graficarDataset(k)
     def graficarUsuario(self):
         k = self.obtenerValorDeK()
@@ -443,8 +392,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         grafico = pyplot.figure(figsize=(8,8))
         ax = grafico.add_subplot()
         ax.plot(limiteInferiorX,limiteInferiorY)
-        if self.obtenerRA():
-            ax.set_aspect(1)
+        ax.set_aspect(1)
         if(len(self.datos.clases)>9):
             self.colores = colors.CSS4_COLORS
         else:
@@ -462,10 +410,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if(self.obtenerRejilla()):
             while(xDelBucle<limiteSuperiorX):
                 pyplot.axvline(x = xDelBucle,linestyle = '-',marker = ",",linewidth=0.2)
-                xDelBucle = xDelBucle + self.obtenerCelda()
+                xDelBucle = xDelBucle + self.ladoDeUnCuadrado
             while(yDelBucle<limiteSuperiorY):
                 pyplot.axhline(y = yDelBucle,linestyle = '-',marker = ",",linewidth=0.2)
-                yDelBucle = yDelBucle + self.obtenerCelda()
+                yDelBucle = yDelBucle + self.ladoDeUnCuadrado
 
         self.diccionario = {}
         i = 0
@@ -476,9 +424,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         for punto in self.datos.datosCompletos:
             pyplot.plot(punto[0],punto[1],marker = '.',color = self.diccionario[punto[2]])
         if (self.radioCuadrado.isChecked()==True):
-            self.insertarGrid(grafico,ax,limiteInferiorX,limiteSuperiorX,limiteInferiorY,limiteSuperiorY,k,self.obtenerCelda())
+            self.insertarGrid(grafico,ax,limiteInferiorX,limiteSuperiorX,limiteInferiorY,limiteSuperiorY,k,self.ladoDeUnCuadrado)
         else:
-            self.insertarCirculos(grafico,ax,limiteInferiorX,limiteSuperiorX,limiteInferiorY,limiteSuperiorY,k,self.obtenerCelda())
+            self.insertarCirculos(grafico,ax,limiteInferiorX,limiteSuperiorX,limiteInferiorY,limiteSuperiorY,k,self.ladoDeUnCuadrado)
         #Crear cuadrados
         
         grafico.show()
