@@ -15,13 +15,14 @@ from copy import deepcopy
 
 from PyQt5.QtWidgets import QFileDialog
 from PyQt5.QtWidgets import QTableWidgetItem
+from PyQt5.QtWidgets import QMessageBox
 
 from matplotlib import pyplot
 from matplotlib import colors
 import matplotlib.patches as mpatches
 from matplotlib.lines import Line2D
 
-
+from QT_Grids import *
 from QT_Main_UI import *
 
 import random
@@ -64,7 +65,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.checkRA.setChecked(True)
         self.checkCelda.setChecked(False)
         self.lineCelda.setEnabled(False)
+        self.linePuntoX.setText('0')
+        self.linePuntoY.setText('0')
         self.lineCelda.setText('0.5')
+        self.btnComparacion.setEnabled(False)
 
         rx = QRegExp("[0-9]\.?[0-9]*")
         validator = QRegExpValidator(rx, self)
@@ -114,6 +118,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.radioRaiz.toggled.connect(self.activarRaiz)
         self.radioElbow.toggled.connect(self.activarMetodo)
         self.checkCelda.stateChanged.connect(self.verCelda)
+        self.btnComparacion.clicked.connect(self.realizarComparacion)
     def verCelda(self):
         self.lineCelda.setEnabled(self.checkCelda.isChecked())
         if self.checkCelda.isChecked():
@@ -186,6 +191,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.threadpool.start(worker1)
     def continuar(self):
         self.btnGraficoMetodo.setEnabled(True)
+        self.btnComparacion.setEnabled(True)
         worker = Worker(self.hiloTestearModeloMetodo) # Any other args, kwargs are passed to the run function
         worker.signals.result.connect(self.print_output)
         worker.signals.finished.connect(self.finTestMetodo)
@@ -197,7 +203,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         puntosDeTest = self.datos.obtenerDatosTest(self.porcentajeEntrenamiento)
 
         self.resultadosTestUsuario = list()
-        k = self.obtenerValorDeK()+1
+        k = self.obtenerValorDeK()
         for i in range(1,k + 1):
             aciertos = 0
             totalElementos = 0
@@ -230,31 +236,58 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         worker.signals.progress.connect(self.progress_fn)
         # Execute
         self.threadpool.start(worker)  
-        
+    
+    def hayUnNumero(self):
+        try:
+            float(self.linePuntoX.text())
+            float(self.linePuntoY.text())
+            return True
+        except ValueError:
+            return False
+    def mostrarError(self,tipo,titulo,mensaje,detalles):
+        coso = QMessageBox()
+        if tipo=='Critical':
+            coso.setIcon(QMessageBox.Critical)
+        else:
+            if tipo=='Information':
+                coso.setIcon(QMessageBox.Information)   
+        coso.setText(mensaje)
+        coso.setInformativeText('')
+        coso.setWindowTitle(titulo)
+        coso.setDetailedText(detalles)
+        coso.setStandardButtons(QMessageBox.Ok)
+        #coso.buttonClicked.connect(msgbtn)
+        retval = coso.exec_()
     def predecirPunto(self):
         self.txtTest.clear()
-
         mipunto = list()
-        mipunto.append(float(self.linePuntoX.text()))
-        mipunto.append(float(self.linePuntoY.text()))
-        
-        #puntosDeEntrenamiento = self.datos.obtenerDatosEntrenamiento(self.porcentajeEntrenamiento)
-        #puntosDeTest = self.datos.obtenerDatosTest(self.porcentajeEntrenamiento)
-        for i in range(1,11):
-            loskvecinos = vecinos(self.datos.datosCompletos,mipunto,i)
-            #print("Para " + str(i) + " vecinos sus vecinos más cercanos son:")
-            #print(loskvecinos)
-            claseDelPunto = prediccion (mipunto,loskvecinos)
-            #print("La clase predicha fue " + claseDelPunto)
-            self.txtTest.insertPlainText("Con " +str(i) + " vecinos, la clase predicha fue " + claseDelPunto + "\n")
-        #self.archivo.datosDeEntrenamiento(self.porcentajeEntrenamiento)
-        #pyplot.plot(self.archivo.datosEntrenamientoX,self.archivo.datosEntrenamientoY,'go')
-        #pyplot.show()      
+        if self.hayUnNumero():
+            mipunto.append(float(self.linePuntoX.text()))
+            mipunto.append(float(self.linePuntoY.text()))
+            #puntosDeEntrenamiento = self.datos.obtenerDatosEntrenamiento(self.porcentajeEntrenamiento)
+            #puntosDeTest = self.datos.obtenerDatosTest(self.porcentajeEntrenamiento)
+            for i in range(1,11):
+                loskvecinos = vecinos(self.datos.datosCompletos,mipunto,i)
+                #print("Para " + str(i) + " vecinos sus vecinos más cercanos son:")
+                #print(loskvecinos)
+                claseDelPunto = prediccion (mipunto,loskvecinos)
+                #print("La clase predicha fue " + claseDelPunto)
+                self.txtTest.insertPlainText("Con " +str(i) + " vecinos, la clase predicha fue " + claseDelPunto + "\n")
+            #self.archivo.datosDeEntrenamiento(self.porcentajeEntrenamiento)
+            #pyplot.plot(self.archivo.datosEntrenamientoX,self.archivo.datosEntrenamientoY,'go')
+            #pyplot.show()      
+        else:
+            tipo='Critical'
+            titulo = 'Error'
+            mensaje = 'No has ingresado un punto válido'
+            detalles = 'Las coordenadas ingresadas no son válidas'
+            self.mostrarError(tipo,titulo,mensaje,detalles)
     def cambiarPorcentajes(self):
         self.porcentajeEntrenamiento = self.spinEntrenamiento.value()
         self.porcentajeTest = 100 - self.spinEntrenamiento.value()
         self.labelTest_2.setText(str(self.porcentajeTest))
         self.btnGraficoMetodo.setEnabled(False)
+        self.btnComparacion.setEnabled(False)
 
     def cambiarKUsuario(self):
         self.valorDeK = self.spinKUsuario.value()
@@ -428,14 +461,31 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def graficarMetodo(self):
         if self.laRaiz:
             k = self.kRaiz
+            mensaje = 'Raiz'
         else:
             k = self.kMetodo
-        self.graficarDataset(k)
+            mensaje = 'Codo'
+        self.graficarDataset(k,mensaje,False)
     def graficarUsuario(self):
         k = self.obtenerValorDeK()
-        self.graficarDataset(k)
+        self.graficarDataset(k,'Usuario',False)
+    def realizarComparacion(self):
+        kUsuario = self.obtenerValorDeK()
+        if self.laRaiz:
+            kMetodo = self.kRaiz
+            metodo = 'Raiz'
+        else:
+            kMetodo = self.kMetodo
+            metodo = 'Codo'
+        for k in range(1,kUsuario+1):
+            self.graficarDataset(k,'Usuario',True)
+        self.graficarDataset(kMetodo,metodo,True)
 
-    def graficarDataset(self,k):
+        self.ventanaComparacion = Grids(kUsuario)
+        self.ventanaComparacion.show()
+
+
+    def graficarDataset(self,k,tipoDeGrafico,imprimir):
         valorDeSeparacionX = (self.datos.maxX()-self.datos.minX())*0.1
         valorDeSeparacionY = (self.datos.maxY()-self.datos.minY())*0.1
         limiteInferiorX = self.datos.minX() - valorDeSeparacionX
@@ -478,36 +528,40 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         lista = list(self.colores.items())
         for clase in self.datos.clases:
             self.diccionario[clase] = lista[i][0]
-            i = i + 1
-
-        
+            i = i + 1        
         puntosEntrenamiento = self.datos.obtenerDatosEntrenamiento(self.porcentajeEntrenamiento)
-
         for punto in puntosEntrenamiento:
             pyplot.plot(punto[0],punto[1],marker = '.',color = self.diccionario[punto[2]])
             
-
-
-
         leyendas = []
         for clase in self.datos.clases:
             leyendas.append(Line2D([0],[0],lw=4,marker='o',color=self.diccionario[clase]))
         pyplot.legend(leyendas, self.datos.clases)
 
-
-
-
-
-
         if (self.radioCuadrado.isChecked()==True):
             self.insertarGrid(grafico,ax,limiteInferiorX,limiteSuperiorX,limiteInferiorY,limiteSuperiorY,k,self.obtenerCelda())
         else:
             self.insertarCirculos(grafico,ax,limiteInferiorX,limiteSuperiorX,limiteInferiorY,limiteSuperiorY,k,self.obtenerCelda())
-        #Crear cuadrados
+        if tipoDeGrafico=='Usuario':
+            nombre = tipoDeGrafico + str(k)
+        else:
+            nombre = 'Metodo'
+        if tipoDeGrafico=='Raiz':
+            mensaje = 'Utilizando método de la Raíz con k = '
+        else:
+            if tipoDeGrafico=='Codo':
+                mensaje = 'Utilizando método del codo con k = '
+            else:
+                mensaje = 'Rango de K ingresado por el usuario, k = '
+        mensaje = mensaje + str(k)
+        pyplot.title(mensaje)
         
-        grafico.show()
-        coso = grafico.savefig('iamge.png')
-        print(type(coso))
+        if imprimir:
+            grafico.savefig(nombre)
+        else:
+            grafico.show()
+
+        
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
