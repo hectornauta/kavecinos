@@ -427,6 +427,19 @@
        <number>99</number>
       </property>
      </widget>
+     <widget class="QPushButton" name="btnComparacion">
+      <property name="geometry">
+       <rect>
+        <x>590</x>
+        <y>10</y>
+        <width>101</width>
+        <height>71</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Comparar gráficos</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QLabel" name="labelElementos">
      <property name="geometry">
