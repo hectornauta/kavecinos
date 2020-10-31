@@ -1,4 +1,5 @@
 from math import sqrt
+from collections import Counter
 
 def distancia(punto1,punto2):
 	return sqrt((punto1[0]-punto2[0])**2 + (punto1[1]-punto2[1])**2)
@@ -28,8 +29,11 @@ def prediccionConCalidad(puntoTest,listadevecinos):
 	calidad = clases.count(clase)/len(clases)	
 	return ((clase,calidad))
 
-def masFrecuente(lista): 
-    return max(set(lista), key = lista.count)
+def masFrecuente(lista):
+	arreglo = Counter(lista)
+	#print(arreglo)
+	return max(lista, key=arreglo.get)
+	#return max(set(lista), key = lista.count)
 
 def predecirClase(listaDePuntos,puntoTest,k):
 	loskvecinos = vecinos(listaDePuntos,puntoTest,k)

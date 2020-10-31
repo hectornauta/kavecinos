@@ -7,7 +7,7 @@ from PyQt5.QtGui import QIcon, QPixmap
 
 class Grids(QMainWindow):
 
-    def __init__(self,k):
+    def __init__(self,k,kmetodo):
         super().__init__()
         self.ventana = Ui_Form()
         self.ventana.setupUi(self)
@@ -16,6 +16,8 @@ class Grids(QMainWindow):
         if k==1:
             self.ventana.btnProx.setEnabled(False)
         self.kActual = 1
+        self.ventana.lineUsuario.setText(str(self.kActual))
+        self.ventana.lineMejor.setText(str(self.kActual))
         self.kMaximo = k
 
         self.ventana.lblUsuario.setPixmap(QPixmap('Usuario'+str(1)+'.png'))
@@ -25,6 +27,7 @@ class Grids(QMainWindow):
         self.ventana.btnProx.clicked.connect(self.adelante)
     def atras(self):
         self.kActual=self.kActual-1
+        self.ventana.lineUsuario.setText(str(self.kActual))
         self.ventana.lblUsuario.setPixmap(QPixmap('Usuario'+str(self.kActual)+'.png'))
         if self.kActual==1:
             self.ventana.btnAnt.setEnabled(False)
@@ -33,6 +36,7 @@ class Grids(QMainWindow):
 
     def adelante(self):
         self.kActual=self.kActual+1
+        self.ventana.lineUsuario.setText(str(self.kActual))
         self.ventana.lblUsuario.setPixmap(QPixmap('Usuario'+str(self.kActual)+'.png'))
         if self.kActual!=1:
             self.ventana.btnAnt.setEnabled(True)

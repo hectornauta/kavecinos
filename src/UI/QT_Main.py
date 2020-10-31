@@ -10,6 +10,7 @@ from core import distancia
 from core import prediccion
 from core import predecirClase
 from core import predecirClaseConCalidad
+from core import masFrecuente
 
 from copy import deepcopy
 
@@ -27,6 +28,8 @@ from QT_Main_UI import *
 
 import random
 from math import sqrt
+from math import trunc
+from collections import Counter
 
 from hilos import Worker
 from hilos import WorkerSignals
@@ -59,9 +62,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.groupBox.setEnabled(False)
         self.radioCuadrado.setChecked(True)
         self.radioElbow.setChecked(True)
-        self.btnDetener.setEnabled(False)
         self.barraProgreso.setEnabled(False)
         self.btnGraficoMetodo.setEnabled(False)
+        self.checkRejilla.setChecked(True)
         self.checkRA.setChecked(True)
         self.checkCelda.setChecked(False)
         self.lineCelda.setEnabled(False)
@@ -69,6 +72,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.linePuntoY.setText('0')
         self.lineCelda.setText('0.5')
         self.btnComparacion.setEnabled(False)
+        self.btnComparacion.setText('Debe calcular un K óptimo para comparar gráficos')
+        self.lblCargaTexto.hide()
 
         rx = QRegExp("[0-9]\.?[0-9]*")
         validator = QRegExpValidator(rx, self)
@@ -118,7 +123,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.radioRaiz.toggled.connect(self.activarRaiz)
         self.radioElbow.toggled.connect(self.activarMetodo)
         self.checkCelda.stateChanged.connect(self.verCelda)
+        
         self.btnComparacion.clicked.connect(self.realizarComparacion)
+        
+        
     def verCelda(self):
         self.lineCelda.setEnabled(self.checkCelda.isChecked())
         if self.checkCelda.isChecked():
@@ -192,6 +200,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def continuar(self):
         self.btnGraficoMetodo.setEnabled(True)
         self.btnComparacion.setEnabled(True)
+        self.btnComparacion.setText('Comparar gráficos')
         worker = Worker(self.hiloTestearModeloMetodo) # Any other args, kwargs are passed to the run function
         worker.signals.result.connect(self.print_output)
         worker.signals.finished.connect(self.finTestMetodo)
@@ -199,7 +208,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Execute
         self.threadpool.start(worker) 
     def hiloTestearModeloUsuario(self,progress_callback):
-        puntosDeEntrenamiento = self.datos.obtenerDatosEntrenamiento(self.porcentajeEntrenamiento)
+        puntosDeEntrenamiento =  self.datos.obtenerDatosEntrenamiento(self.porcentajeEntrenamiento)
         puntosDeTest = self.datos.obtenerDatosTest(self.porcentajeEntrenamiento)
 
         self.resultadosTestUsuario = list()
@@ -254,7 +263,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         coso.setText(mensaje)
         coso.setInformativeText('')
         coso.setWindowTitle(titulo)
-        coso.setDetailedText(detalles)
+        if detalles!='':
+            coso.setDetailedText(detalles)
         coso.setStandardButtons(QMessageBox.Ok)
         #coso.buttonClicked.connect(msgbtn)
         retval = coso.exec_()
@@ -288,6 +298,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.labelTest_2.setText(str(self.porcentajeTest))
         self.btnGraficoMetodo.setEnabled(False)
         self.btnComparacion.setEnabled(False)
+        self.btnComparacion.setText('Debe calcular un K óptimo para comparar gráficos')
 
     def cambiarKUsuario(self):
         self.valorDeK = self.spinKUsuario.value()
@@ -301,7 +312,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.archivo = Archivo(ruta_de_archivo)
             self.archivo.abrir(self.separadores[self.comboSeparador.currentText()])
             self.groupBox.setEnabled(True)
-            self.btnDetener.setEnabled(True)
             self.barraProgreso.setEnabled(True)
             self.txtTest.clear()
             self.txtMejorK.clear()
@@ -331,7 +341,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             self.label_2.setText("No se ha seleccionado ningún archivo")
             self.groupBox.setEnabled(False)
-            self.btnDetener.setEnabled(False)
             self.barraProgreso.setEnabled(False)
     def obtenerValorDeK(self):
         return int(self.spinKUsuario.value())
@@ -407,55 +416,52 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         cuadrados = []
         x = limiteInferiorX
         y = limiteInferiorY
-        random.seed(datetime.datetime.now())
 
-        xDePrueba = x + self.ladoDeUnCuadrado/2
-        yDePrueba = y + self.ladoDeUnCuadrado/2
+        xDePrueba = x + salto/2
+        yDePrueba = y + salto/2
         while(y<limiteSuperiorY):
             x = limiteInferiorX
-            xDePrueba = x + self.ladoDeUnCuadrado/2
+            xDePrueba = x + salto/2
             while(x<limiteSuperiorX):
                 clase = predecirClase(self.datos.datosCompletos,(xDePrueba,yDePrueba),k)
                 color = self.diccionario[clase]
-                cuadrado = mpatches.Rectangle((x,y),self.ladoDeUnCuadrado,self.ladoDeUnCuadrado,angle = 0.0,color=color, alpha=0.4,linewidth=0)
+                cuadrado = mpatches.Rectangle((x,y),salto,salto,angle = 0.0,color=color, alpha=0.4,linewidth=0)
                 #grafico.patches.extend([pyplot.Rectangle((x,y),saltoDelCuadrado,saltoDelCuadrado,
                                   #fill=True, color=color, alpha=0.5, zorder=1000,
                                   #transform=grafico.transFigure, figure=grafico)])
                 cuadrados.append(cuadrado)
                 ejes.add_patch(cuadrado)
-                x = x + self.ladoDeUnCuadrado
-                xDePrueba = x + self.ladoDeUnCuadrado/2
-            y = y + self.ladoDeUnCuadrado
-            yDePrueba = y + self.ladoDeUnCuadrado/2
+                x = x + salto
+                xDePrueba = x + salto/2
+            y = y + salto
+            yDePrueba = y + salto/2
         #for c in cuadrados:
             #print(str(c) + "/n")
     def insertarCirculos(self,grafico,ejes,limiteInferiorX,limiteSuperiorX,limiteInferiorY,limiteSuperiorY,k,salto):
-        #coordenadas = list()
         cuadrados = []
         x = limiteInferiorX
         y = limiteInferiorY
-        random.seed(datetime.datetime.now())
 
-        xDePrueba = x + self.ladoDeUnCuadrado/2
-        yDePrueba = y + self.ladoDeUnCuadrado/2
+        xDePrueba = x + salto/2
+        yDePrueba = y + salto/2
         while(y<limiteSuperiorY):
             x = limiteInferiorX
-            xDePrueba = x + self.ladoDeUnCuadrado/2
+            xDePrueba = x + salto/2
             while(x<limiteSuperiorX):
                 clase = (predecirClaseConCalidad(self.datos.datosCompletos,(xDePrueba,yDePrueba),k))[0]
                 calidad = (predecirClaseConCalidad(self.datos.datosCompletos,(xDePrueba,yDePrueba),k))[1]
-                calidad = ((self.ladoDeUnCuadrado/2)*(calidad))
+                calidad = ((salto/2)*(calidad))
                 color = self.diccionario[clase]
-                cuadrado = mpatches.Circle((x+(self.ladoDeUnCuadrado/2),y+(self.ladoDeUnCuadrado/2)),radius=calidad,color=color, alpha=0.4,linewidth=0)
+                cuadrado = mpatches.Circle((x+(salto/2),y+(salto/2)),radius=calidad,color=color, alpha=0.4,linewidth=0)
                 #grafico.patches.extend([pyplot.Rectangle((x,y),saltoDelCuadrado,saltoDelCuadrado,
                                   #fill=True, color=color, alpha=0.5, zorder=1000,
                                   #transform=grafico.transFigure, figure=grafico)])
                 cuadrados.append(cuadrado)
                 ejes.add_patch(cuadrado)
-                x = x + self.ladoDeUnCuadrado
-                xDePrueba = x + self.ladoDeUnCuadrado/2
-            y = y + self.ladoDeUnCuadrado
-            yDePrueba = y + self.ladoDeUnCuadrado/2
+                x = x + salto
+                xDePrueba = x + salto/2
+            y = y + salto
+            yDePrueba = y + salto/2
         #for c in cuadrados:
             #print(str(c) + "/n")
     def graficarMetodo(self):
@@ -470,6 +476,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         k = self.obtenerValorDeK()
         self.graficarDataset(k,'Usuario',False)
     def realizarComparacion(self):
+        self.lblCargaTexto.show()
+        tipo='Information'
+        titulo = 'Aviso'
+        mensaje = 'Esta operación podría tardar. Por favor espere...'
+        detalles = ''
+        self.mostrarError(tipo,titulo,mensaje,detalles)
         kUsuario = self.obtenerValorDeK()
         if self.laRaiz:
             kMetodo = self.kRaiz
@@ -481,8 +493,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.graficarDataset(k,'Usuario',True)
         self.graficarDataset(kMetodo,metodo,True)
 
-        self.ventanaComparacion = Grids(kUsuario)
+        self.ventanaComparacion = Grids(kUsuario,kMetodo)
         self.ventanaComparacion.show()
+        self.lblCargaTexto.hide()
 
 
     def graficarDataset(self,k,tipoDeGrafico,imprimir):
@@ -506,8 +519,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #divisionX = (self.datos.maxX() + valorDeSeparacionX - self.datos.minX() + valorDeSeparacionY) / (self.numero_de_divisiones)
         #divisionY = (self.datos.maxY() + valorDeSeparacionY - self.datos.minY() + valorDeSeparacionY) / (self.numero_de_divisiones)
         #print(divisionX)
-        pyplot.xlim(limiteInferiorX,limiteSuperiorX)
-        pyplot.ylim(limiteInferiorY,limiteSuperiorY)
+
+        limiteCeldaX = (trunc(((limiteSuperiorX-limiteInferiorX)/self.obtenerCelda()))+1)*self.obtenerCelda()+limiteInferiorX
+        limiteCeldaY = (trunc(((limiteSuperiorY-limiteInferiorY)/self.obtenerCelda()))+1)*self.obtenerCelda()+limiteInferiorY
+
+        pyplot.xlim(limiteInferiorX,limiteCeldaX)
+        pyplot.ylim(limiteInferiorY,limiteCeldaY)
 
         pyplot.xlabel(self.datos.atributos[0])
         pyplot.ylabel(self.datos.atributos[1])
@@ -536,10 +553,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         leyendas = []
         for clase in self.datos.clases:
             leyendas.append(Line2D([0],[0],lw=4,marker='o',color=self.diccionario[clase]))
-        pyplot.legend(leyendas, self.datos.clases)
+        pyplot.legend(leyendas, self.datos.clases,loc='upper left')
 
         if (self.radioCuadrado.isChecked()==True):
-            self.insertarGrid(grafico,ax,limiteInferiorX,limiteSuperiorX,limiteInferiorY,limiteSuperiorY,k,self.obtenerCelda())
+            self.insertarGridV2(grafico,ax,limiteInferiorX,limiteSuperiorX,limiteInferiorY,limiteSuperiorY,k,self.obtenerCelda())
         else:
             self.insertarCirculos(grafico,ax,limiteInferiorX,limiteSuperiorX,limiteInferiorY,limiteSuperiorY,k,self.obtenerCelda())
         if tipoDeGrafico=='Usuario':
@@ -561,7 +578,95 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             grafico.show()
 
-        
+    def insertarGridV2(self,grafico,ejes,limiteInferiorX,limiteSuperiorX,limiteInferiorY,limiteSuperiorY,k,salto):
+        #¶coordenadas = list()
+        cuadrados = []
+        x = limiteInferiorX
+        y = limiteInferiorY
+
+        xDePrueba = x + salto/2
+        yDePrueba = y + salto/2
+
+        while(y<limiteSuperiorY):
+            x = limiteInferiorX
+            xDePrueba = x + salto/2
+            while(x<limiteSuperiorX):
+                clases = []
+                clase1 = predecirClase(self.datos.datosCompletos,(xDePrueba-(salto/2),yDePrueba-(salto/2)),k)
+                clases.append(clase1)
+                clase2 = predecirClase(self.datos.datosCompletos,(xDePrueba-(salto/2),yDePrueba+(salto/2)),k)
+                clases.append(clase2)
+                clase3 = predecirClase(self.datos.datosCompletos,(xDePrueba+(salto/2),yDePrueba-(salto/2)),k)
+                clases.append(clase3)
+                clase4 = predecirClase(self.datos.datosCompletos,(xDePrueba+(salto/2),yDePrueba+(salto/2)),k)
+                clases.append(clase4)
+                contadores = Counter(clases)
+                clase = masFrecuente(clases)
+                calidad = contadores[clase]
+                if calidad==1:
+                    proporcion=0.0
+                else:
+                    if calidad==2:
+                        proporcion=0.1
+                    else:
+                        if calidad==3:
+                            proporcion=0.5
+                        else:
+                            proporcion=1
+                color = self.diccionario[clase]
+                cuadrado = mpatches.Rectangle((x,y),salto,salto,angle = 0.0,color=color, alpha=(0.5*proporcion),linewidth=0)
+                cuadrados.append(cuadrado)
+                ejes.add_patch(cuadrado)
+                x = x + salto
+                xDePrueba = x + salto/2
+            y = y + salto
+            yDePrueba = y + salto/2   
+    def insertarGridV3(self,grafico,ejes,limiteInferiorX,limiteSuperiorX,limiteInferiorY,limiteSuperiorY,k,salto):
+        x = limiteInferiorX
+        y = limiteInferiorY
+
+        xDePrueba = x + salto/2
+        yDePrueba = y + salto/2
+
+        tabla = []
+
+        while(y<limiteSuperiorY):
+            x = limiteInferiorX
+            xDePrueba = x + salto/2
+            fila = []
+            while(x<limiteSuperiorX):
+                clases = []
+                clase1 = predecirClase(self.datos.datosCompletos,(xDePrueba-(salto/2),yDePrueba-(salto/2)),k)
+                clases.append(clase1)
+                clase2 = predecirClase(self.datos.datosCompletos,(xDePrueba-(salto/2),yDePrueba+(salto/2)),k)
+                clases.append(clase2)
+                clase3 = predecirClase(self.datos.datosCompletos,(xDePrueba+(salto/2),yDePrueba-(salto/2)),k)
+                clases.append(clase3)
+                clase4 = predecirClase(self.datos.datosCompletos,(xDePrueba+(salto/2),yDePrueba+(salto/2)),k)
+                clases.append(clase4)
+                contadores = Counter(clases)
+                clase = masFrecuente(clases)
+                calidad = contadores[clase]
+                if calidad==1:
+                    proporcion=0.0
+                else:
+                    if calidad==2:
+                        proporcion=0.1
+                    else:
+                        if calidad==3:
+                            proporcion=0.5
+                        else:
+                            proporcion=1
+                color = self.diccionario[clase]
+                celda = []
+                celda.append((clase,proporcion))
+                fila.append(celda)
+                x = x + salto
+                xDePrueba = x + salto/2
+            tabla.insert(0,fila)
+            y = y + salto
+            yDePrueba = y + salto/2      
+        print(tabla)  
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
