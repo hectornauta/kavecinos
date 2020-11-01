@@ -419,32 +419,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return float(self.lineCelda.text())
         else:
             return 0.5
-    def insertarGrid(self,grafico,ejes,limiteInferiorX,limiteSuperiorX,limiteInferiorY,limiteSuperiorY,k,salto):
-        #¶coordenadas = list()
-        cuadrados = []
-        x = limiteInferiorX
-        y = limiteInferiorY
-
-        xDePrueba = x + salto/2
-        yDePrueba = y + salto/2
-        while(y<limiteSuperiorY):
-            x = limiteInferiorX
-            xDePrueba = x + salto/2
-            while(x<limiteSuperiorX):
-                clase = predecirClase(self.datos.datosCompletos,(xDePrueba,yDePrueba),k)
-                color = self.diccionario[clase]
-                cuadrado = mpatches.Rectangle((x,y),salto,salto,angle = 0.0,color=color, alpha=0.4,linewidth=0)
-                #grafico.patches.extend([pyplot.Rectangle((x,y),saltoDelCuadrado,saltoDelCuadrado,
-                                  #fill=True, color=color, alpha=0.5, zorder=1000,
-                                  #transform=grafico.transFigure, figure=grafico)])
-                cuadrados.append(cuadrado)
-                ejes.add_patch(cuadrado)
-                x = x + salto
-                xDePrueba = x + salto/2
-            y = y + salto
-            yDePrueba = y + salto/2
-        #for c in cuadrados:
-            #print(str(c) + "/n")
     def insertarCirculos(self,grafico,ejes,limiteInferiorX,limiteSuperiorX,limiteInferiorY,limiteSuperiorY,k,salto):
         cuadrados = []
         x = limiteInferiorX
@@ -627,54 +601,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 x = x + salto
                 xDePrueba = x + salto/2
             y = y + salto
-            yDePrueba = y + salto/2   
-    def insertarGridV3(self,grafico,ejes,limiteInferiorX,limiteSuperiorX,limiteInferiorY,limiteSuperiorY,k,salto):
-        x = limiteInferiorX
-        y = limiteInferiorY
-
-        xDePrueba = x + salto/2
-        yDePrueba = y + salto/2
-
-        tabla = []
-
-        while(y<limiteSuperiorY):
-            x = limiteInferiorX
-            xDePrueba = x + salto/2
-            fila = []
-            while(x<limiteSuperiorX):
-                clases = []
-                clase1 = predecirClase(self.datos.datosCompletos,(xDePrueba-(salto/2),yDePrueba-(salto/2)),k)
-                clases.append(clase1)
-                clase2 = predecirClase(self.datos.datosCompletos,(xDePrueba-(salto/2),yDePrueba+(salto/2)),k)
-                clases.append(clase2)
-                clase3 = predecirClase(self.datos.datosCompletos,(xDePrueba+(salto/2),yDePrueba-(salto/2)),k)
-                clases.append(clase3)
-                clase4 = predecirClase(self.datos.datosCompletos,(xDePrueba+(salto/2),yDePrueba+(salto/2)),k)
-                clases.append(clase4)
-                contadores = Counter(clases)
-                clase = masFrecuente(clases)
-                calidad = contadores[clase]
-                if calidad==1:
-                    proporcion=0.0
-                else:
-                    if calidad==2:
-                        proporcion=0.1
-                    else:
-                        if calidad==3:
-                            proporcion=0.5
-                        else:
-                            proporcion=1
-                color = self.diccionario[clase]
-                celda = []
-                celda.append((clase,proporcion))
-                fila.append(celda)
-                x = x + salto
-                xDePrueba = x + salto/2
-            tabla.insert(0,fila)
-            y = y + salto
-            yDePrueba = y + salto/2      
-        print(tabla)  
-
+            yDePrueba = y + salto/2 
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
     window = MainWindow()
