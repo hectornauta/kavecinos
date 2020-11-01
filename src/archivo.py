@@ -1,5 +1,6 @@
 import csv
 
+#TODO:Borrar las cosas de datos porque las tiene la clase Datos ahora
 class Archivo():
     def __init__(self, ruta_de_archivo):
         self.ruta = ruta_de_archivo

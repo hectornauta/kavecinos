@@ -15,7 +15,6 @@ def prediccion(puntoTest,listadevecinos):
 	clases = list()
 	for vecino in listadevecinos:
 		clases.append(vecino[0][-1])
-	#print(clases)
 	clase = masFrecuente(clases)	
 	return clase
 

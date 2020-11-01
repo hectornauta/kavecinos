@@ -165,12 +165,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.resultadosTestMetodo = list()
         aciertos = 0
         totalElementos = 0
+        totalDeTests = 10
         if self.laRaiz:
             k = self.kRaiz
         else:
             k = self.kMetodo
-        total = len(self.datos.obtenerDatosTest(self.porcentajeEntrenamiento))*10
-        for i in range(1,11):
+        total = len(self.datos.obtenerDatosTest(self.porcentajeEntrenamiento))*totalDeTests
+        for i in range(1,totalDeTests+1):
             self.datos.aleatorizar()
             puntosDeEntrenamiento = self.datos.obtenerDatosEntrenamiento(self.porcentajeEntrenamiento)
             puntosDeTest = self.datos.obtenerDatosTest(self.porcentajeEntrenamiento)
@@ -367,7 +368,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def hiloCalcularKElbow(self,progress_callback):
         puntosDeEntrenamiento = self.datos.obtenerDatosEntrenamiento(self.porcentajeEntrenamiento)
         puntosDeTest = self.datos.obtenerDatosTest(self.porcentajeEntrenamiento)
-
+        raiz = self.calcularKRaiz()
         self.resultadosTestMetodo = list()
         aciertos = 0
         totalElementos = 0
@@ -389,16 +390,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     aciertos = aciertos + 1
             porcentajeDeAciertos = (aciertos / totalElementos) * 100
             self.resultadosTestMetodo.append((k,porcentajeDeAciertos))
+            #¹print('k' + str(k) + 'j' + str(j) + 'raiz' + str(raiz))
             if (porcentajeDeAciertos>mejorValor):
                 mejorValor = porcentajeDeAciertos
                 mejorK = k
                 j = 0
             else:
                 j = j + 1
-            if ((j>10) or (porcentajeDeAciertos==100) or (k>30)):
+            if ((j>(raiz/2)) or (k>raiz)):
                 fin = True
             else:
-                k = k + 1           
+                k = k + 1    
         #for resultado in resultados:
             #self.txtMejorK.insertPlainText("Con K = " + str(resultado[0]) + ", la eficacia fue de " + "{:.2f}".format(resultado[1]) + "% \n")
         self.kMetodo = mejorK
