@@ -151,10 +151,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
     def finTestMetodo(self):
         for resultado in self.resultadosTestMetodo:
-            self.txtMejorK.insertPlainText("Con K = " + str(resultado[0]) + ", la eficacia fue de " + "{:.2f}".format(resultado[1]) + "% \n")
+            self.txtMejorK.insertPlainText("Con K = " + str(resultado[0]) + ", la precisión fue de " + "{:.2f}".format(resultado[1]) + "% \n")
     def finTestUsuario(self):
         for resultado in self.resultadosTestUsuario:
-            self.txtTest.insertPlainText("Con K = " + str(resultado[0]) + ", la eficacia fue de " + "{:.2f}".format(resultado[1]) + "% \n")
+            self.txtTest.insertPlainText("Con K = " + str(resultado[0]) + ", la precisión fue de " + "{:.2f}".format(resultado[1]) + "% \n")
 
     #☺def recurring_timer(self):
         #self.counter +=1
@@ -190,6 +190,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     
     def testearModeloMetodo(self):
         self.txtMejorK.clear()
+        self.txtMejorK.insertPlainText('Ordenando aleatoriamente los datos...\n')
+        self.datos.aleatorizar()
         self.barraProgreso.setValue(0)
         if self.laRaiz:
             self.kRaiz = self.calcularKRaiz()

@@ -142,27 +142,27 @@
      <widget class="QRadioButton" name="radioCirculo">
       <property name="geometry">
        <rect>
-        <x>290</x>
+        <x>240</x>
         <y>20</y>
-        <width>82</width>
+        <width>161</width>
         <height>17</height>
        </rect>
       </property>
       <property name="text">
-       <string>Círculos</string>
+       <string>Círculos (método alternativo)</string>
       </property>
      </widget>
      <widget class="QRadioButton" name="radioCuadrado">
       <property name="geometry">
        <rect>
-        <x>290</x>
+        <x>240</x>
         <y>40</y>
-        <width>82</width>
+        <width>241</width>
         <height>17</height>
        </rect>
       </property>
       <property name="text">
-       <string>Cuadrados</string>
+       <string>Cuadrados (método propuesto por la cátedra)</string>
       </property>
      </widget>
      <widget class="QCheckBox" name="checkRA">
@@ -183,18 +183,18 @@
        <rect>
         <x>10</x>
         <y>60</y>
-        <width>161</width>
+        <width>171</width>
         <height>17</height>
        </rect>
       </property>
       <property name="text">
-       <string>Lado de celda personalizado</string>
+       <string>Tamaño de celda personalizado</string>
       </property>
      </widget>
      <widget class="QLineEdit" name="lineCelda">
       <property name="geometry">
        <rect>
-        <x>170</x>
+        <x>190</x>
         <y>60</y>
         <width>31</width>
         <height>20</height>
@@ -212,7 +212,7 @@
       </rect>
      </property>
      <property name="title">
-      <string>Testear eficacia</string>
+      <string>Testear precisión</string>
      </property>
      <widget class="QGroupBox" name="grupoTestMetodo">
       <property name="geometry">
@@ -224,7 +224,7 @@
        </rect>
       </property>
       <property name="title">
-       <string>Método para calcular mejor K</string>
+       <string>Método para estimar K</string>
       </property>
       <widget class="QPlainTextEdit" name="txtMejorK">
        <property name="geometry">
@@ -285,7 +285,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Calcular K y testear</string>
+        <string>Calcular K y Testear modelo</string>
        </property>
       </widget>
      </widget>
@@ -311,7 +311,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Probar Modelo</string>
+        <string>Testear Modelo</string>
        </property>
       </widget>
       <widget class="QPlainTextEdit" name="txtTest">
@@ -342,7 +342,7 @@
         <number>1</number>
        </property>
        <property name="maximum">
-        <number>20</number>
+        <number>10</number>
        </property>
       </widget>
       <widget class="QLabel" name="labelKTest">
