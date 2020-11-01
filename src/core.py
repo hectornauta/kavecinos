@@ -10,7 +10,6 @@ def vecinos(listaDePuntos,puntoTest,k):
 		vecinos.append((punto,d))
 	vecinos.sort(key=lambda tup: tup[1])
 	vecinos = vecinos[0:k]
-	#print(vecinos)
 	return vecinos
 def prediccion(puntoTest,listadevecinos):
 	clases = list()
@@ -30,10 +29,13 @@ def prediccionConCalidad(puntoTest,listadevecinos):
 	return ((clase,calidad))
 
 def masFrecuente(lista):
-	arreglo = Counter(lista)
-	#print(arreglo)
-	return max(lista, key=arreglo.get)
-	#return max(set(lista), key = lista.count)
+	#arreglo = Counter(lista)
+	#resultado1 = max(lista, key=arreglo.get)
+	#return max(lista, key=arreglo.get)
+	#resultado2 = max(set(lista), key = lista.count)
+	#if resultado1!=resultado2:
+		#print('Diferencia!')
+	return max(set(lista), key = lista.count)
 
 def predecirClase(listaDePuntos,puntoTest,k):
 	loskvecinos = vecinos(listaDePuntos,puntoTest,k)

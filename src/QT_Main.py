@@ -161,8 +161,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #self.l.setText("Counter: %d" % self.counter)
 
     def hiloTestearModeloMetodo(self,progress_callback):
-        puntosDeEntrenamiento = self.datos.obtenerDatosEntrenamiento(self.porcentajeEntrenamiento)
-        puntosDeTest = self.datos.obtenerDatosTest(self.porcentajeEntrenamiento)
 
         self.resultadosTestMetodo = list()
         aciertos = 0
@@ -171,16 +169,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             k = self.kRaiz
         else:
             k = self.kMetodo
-        total = len(puntosDeTest)
-        for puntoDeTest in puntosDeTest:
-            loskvecinos = vecinos(puntosDeEntrenamiento,puntoDeTest,k)
-            claseDelPunto = prediccion (puntoDeTest,loskvecinos)
-            totalElementos = totalElementos + 1
-            if (claseDelPunto==puntoDeTest[-1]):
-                aciertos = aciertos + 1
-            progreso = totalElementos
-            n = int((progreso*100)/total)
-            progress_callback.emit(n)
+        total = len(self.datos.obtenerDatosTest(self.porcentajeEntrenamiento))*10
+        for i in range(1,11):
+            self.datos.aleatorizar()
+            puntosDeEntrenamiento = self.datos.obtenerDatosEntrenamiento(self.porcentajeEntrenamiento)
+            puntosDeTest = self.datos.obtenerDatosTest(self.porcentajeEntrenamiento)
+
+            for puntoDeTest in puntosDeTest:
+                loskvecinos = vecinos(puntosDeEntrenamiento,puntoDeTest,k)
+                claseDelPunto = prediccion (puntoDeTest,loskvecinos)
+                totalElementos = totalElementos + 1
+                if (claseDelPunto==puntoDeTest[-1]):
+                    aciertos = aciertos + 1
+                progreso = totalElementos
+                n = int((progreso*100)/total)
+                progress_callback.emit(n)
         porcentajeDeAciertos = (aciertos / totalElementos) * 100
         self.resultadosTestMetodo.append((k,porcentajeDeAciertos))
     
@@ -208,28 +211,29 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Execute
         self.threadpool.start(worker) 
     def hiloTestearModeloUsuario(self,progress_callback):
-        puntosDeEntrenamiento =  self.datos.obtenerDatosEntrenamiento(self.porcentajeEntrenamiento)
-        puntosDeTest = self.datos.obtenerDatosTest(self.porcentajeEntrenamiento)
 
         self.resultadosTestUsuario = list()
         k = self.obtenerValorDeK()
+        total = k*10*len(self.datos.obtenerDatosTest(self.porcentajeEntrenamiento))
+        progreso = 0
         for i in range(1,k + 1):
             aciertos = 0
             totalElementos = 0
-            #TODO: mostrar en una tabla los resultados, por ejemplo
-            #clasesPredichas = list()
-            #clasesReales = list()
-            for puntoDeTest in puntosDeTest:
-                loskvecinos = vecinos(puntosDeEntrenamiento,puntoDeTest,i)
-                claseDelPunto = prediccion (puntoDeTest,loskvecinos)
-                totalElementos = totalElementos + 1
-                if (claseDelPunto==puntoDeTest[-1]):
-                    aciertos = aciertos + 1
+            for j in range(1,11):
+                self.datos.aleatorizar()
+                puntosDeEntrenamiento =  self.datos.obtenerDatosEntrenamiento(self.porcentajeEntrenamiento)
+                puntosDeTest = self.datos.obtenerDatosTest(self.porcentajeEntrenamiento)
+                for puntoDeTest in puntosDeTest:
+                    progreso = progreso + 1
+                    loskvecinos = vecinos(puntosDeEntrenamiento,puntoDeTest,i)
+                    claseDelPunto = prediccion (puntoDeTest,loskvecinos)
+                    totalElementos = totalElementos + 1
+                    if (claseDelPunto==puntoDeTest[-1]):
+                        aciertos = aciertos + 1
+                    n = int((progreso*100)/total)
+                    progress_callback.emit(n)
             porcentajeDeAciertos = (aciertos / totalElementos) * 100
             self.resultadosTestUsuario.append((i,porcentajeDeAciertos))
-            #self.progress_fn(i,k)
-            n = int((i*100)/k)
-            progress_callback.emit(n)
         #for resultado in resultados:
             #self.txtTest.insertPlainText("Con K = " + str(resultado[0]) + ", la eficacia fue de " + "{:.2f}".format(resultado[1]) + "% \n")
             #TODO: esto no debería pasar porque están en hilos distintos
@@ -546,8 +550,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         for clase in self.datos.clases:
             self.diccionario[clase] = lista[i][0]
             i = i + 1        
-        puntosEntrenamiento = self.datos.obtenerDatosEntrenamiento(self.porcentajeEntrenamiento)
-        for punto in puntosEntrenamiento:
+        puntos = self.datos.datosCompletos#ËpuntosEntrenamiento = self.datos.obtenerDatosEntrenamiento(self.porcentajeEntrenamiento)
+        for punto in puntos:#puntosEntrenamiento:
             pyplot.plot(punto[0],punto[1],marker = '.',color = self.diccionario[punto[2]])
             
         leyendas = []
@@ -579,12 +583,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             grafico.show()
 
     def insertarGridV2(self,grafico,ejes,limiteInferiorX,limiteSuperiorX,limiteInferiorY,limiteSuperiorY,k,salto):
-        #¶coordenadas = list()
         cuadrados = []
         x = limiteInferiorX
         y = limiteInferiorY
 
-        xDePrueba = x + salto/2
+        #xDePrueba = x + salto/2
         yDePrueba = y + salto/2
 
         while(y<limiteSuperiorY):
