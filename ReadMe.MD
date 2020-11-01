@@ -12,41 +12,25 @@
 **4 - Instalar paquetes (sólo una vez y luego de instalar y activar el entorno)**
 * Moverse a /kavecinos/
 * Comando pip install PyQt5
-* Comando pip install pyqt5-tools
 * Comando pip install matplotlib
+* Comando pip install pyqt5-tools (si se desea desarollar la aplicación)
 
-**Cómo hacer las cosas**  
-**Hacer widgets**  
-* Moverse a kavecinos/  
-* Comando designer  
-* Hacemos las cosas que tengamos que hacer, luego la guardamos en la carpeta UI con un nombre adecuado  
+**5 - Cómo ejecutar el programa**
+* Moverse a /kavecinos/
+* Activar entorno virtual
+* Moverse a /kavecinos/src
+* Comando python .\QT_Main.py
 
-**Convertir los widgets en scripts de python (debe hacerse cada vez que se modifica un widget con el designer)**
+**Creación de widgets**
 * Moverse a /kavecinos/src/UI
-* Comando pyuic5 -x nombre_del_widget.ui -o nombre_del_widget_UI.py
+* Comando pyuic5 -x widget.ui -o widget_UI.py
 
-**Crear la lógica de los widgets (acá va la lógica, no en el anterior)**
-* Crear un archivo llamado nombre_del_widget.py
-* Emplear la lógica utilizando el archivo template.py como base
-* Es aquí donde irán los eventos y las acciones que se hacen
-* **TODO: ampliar esta parte**
+**Desarrollo de la lógica de un widget**
+* Crear un archivo llamado widget.py
+* Es aquí donde irán los eventos y las acciones que se hacen en el mismo
 
 **Probar si anduvo el widget**
 * Moverse a /kavecinos/src/UI
 * Comando python nombre_del_widget.py
 * Ver errores en la consola
 
-**Cómo ejecutar el programa**
-* Moverse a /kavecinos/
-* Activar entorno virtual
-* Moverse a /kavecinos/src
-* Comando python .\UI\QT_Main.py
-
-**Tutoriales**
-* Tutorial de todos los widgets https://coderslegacy.com/python/pyqt-qprogressbar/
-* Tutorial de ZetCode http://zetcode.com/gui/pyqt5/
-* Proyectos de prueba: https://github.com/learnpyqt/15-minute-apps
-* Ejemplos: https://github.com/pyqt/examples
-* Español 1 https://medium.com/@hektorprofe/primeros-pasos-en-pyqt-5-y-qt-designer-programas-gráficos-con-python-6161fba46060
-* Español 2 https://medium.com/@hektorprofe/widgets-de-pyqt-5-1-ventanas-y-cuadros-de-diálogo-937caf847789
-* Tutorial con MVC (lo que haríamos nosotros) https://www.learnpyqt.com/courses/model-views/modelview-architecture/

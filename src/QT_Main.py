@@ -317,34 +317,44 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if ruta_de_archivo:
             self.label_2.setText(ruta_de_archivo)
             self.archivo = Archivo(ruta_de_archivo)
-            self.archivo.abrir(self.separadores[self.comboSeparador.currentText()])
-            self.groupBox.setEnabled(True)
-            self.barraProgreso.setEnabled(True)
-            self.txtTest.clear()
-            self.txtMejorK.clear()
+            try:
+                self.archivo.abrir(self.separadores[self.comboSeparador.currentText()])
+            except:
+                self.label_2.setText("Separadores no válidos")
+                self.groupBox.setEnabled(False)
+                self.barraProgreso.setEnabled(False)   
+                tipo='Critical'
+                titulo = 'No se ha podido cargar el archivo'
+                mensaje = 'Los separadores de datos escogidos no son válidos para este archivo, pruebe con otro/s'
+                detalles = ''
+                self.mostrarError(tipo,titulo,mensaje,detalles)
+            else:
+                self.groupBox.setEnabled(True)
+                self.barraProgreso.setEnabled(True)
+                self.txtTest.clear()
+                self.txtMejorK.clear()
 
-            self.valorDeK = 7
+                self.valorDeK = 7
 
-            #print("datos del archivo")
-            #print(self.archivo.datos)
-            self.datos = Datos()
-            self.datos.atributos = self.archivo.columnas
-            self.datos.generar(deepcopy(self.archivo.datos))
+                #print("datos del archivo")
+                #print(self.archivo.datos)
+                self.datos = Datos()
+                self.datos.atributos = self.archivo.columnas
+                self.datos.generar(deepcopy(self.archivo.datos))
 
-            #print("datos del archivo")
-            #print(self.archivo.datos)
+                #print("datos del archivo")
+                #print(self.archivo.datos)
 
-            self.tableWidget.setColumnCount(self.archivo.numcolumnas)
-            self.tableWidget.setRowCount(self.archivo.numfilas)
-            self.tableWidget.setHorizontalHeaderLabels(self.archivo.columnas)
-            self.lineClases.setText(str(self.datos.obtenerNumeroDeClases()))
-            self.lineElementos.setText(str(self.datos.obtenerCantidad()))
+                self.tableWidget.setColumnCount(self.archivo.numcolumnas)
+                self.tableWidget.setRowCount(self.archivo.numfilas)
+                self.tableWidget.setHorizontalHeaderLabels(self.archivo.columnas)
+                self.lineClases.setText(str(self.datos.obtenerNumeroDeClases()))
+                self.lineElementos.setText(str(self.datos.obtenerCantidad()))
 
-            
-            for fila in range(self.archivo.numfilas):
-                for columna in range(self.archivo.numcolumnas):
-                    self.tableWidget.setItem(fila, columna, QTableWidgetItem((self.archivo.datos[fila][columna])))
-
+                
+                for fila in range(self.archivo.numfilas):
+                    for columna in range(self.archivo.numcolumnas):
+                        self.tableWidget.setItem(fila, columna, QTableWidgetItem((self.archivo.datos[fila][columna])))
         else:
             self.label_2.setText("No se ha seleccionado ningún archivo")
             self.groupBox.setEnabled(False)
