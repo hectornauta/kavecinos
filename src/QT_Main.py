@@ -226,24 +226,30 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         k = self.obtenerValorDeK()
         total = k*10*len(self.datos.obtenerDatosTest(self.porcentajeEntrenamiento))
         progreso = 0
-        for i in range(1,k + 1):
-            aciertos = 0
-            totalElementos = 0
-            for j in range(1,11):
-                self.datos.aleatorizar()
-                puntosDeEntrenamiento =  self.datos.obtenerDatosEntrenamiento(self.porcentajeEntrenamiento)
-                puntosDeTest = self.datos.obtenerDatosTest(self.porcentajeEntrenamiento)
-                for puntoDeTest in puntosDeTest:
+
+        listadedatos = []
+        for i in range(1,k+1):
+            listadedatos.append(0)
+
+        for i in range(1,11):
+            self.datos.aleatorizar()
+            puntosDeEntrenamiento =  self.datos.obtenerDatosEntrenamiento(self.porcentajeEntrenamiento)
+            puntosDeTest = self.datos.obtenerDatosTest(self.porcentajeEntrenamiento)
+            for puntoDeTest in puntosDeTest:
+                loskvecinos = vecinos(puntosDeEntrenamiento,puntoDeTest,k)
+                for j in range(1,k+1):
                     progreso = progreso + 1
-                    loskvecinos = vecinos(puntosDeEntrenamiento,puntoDeTest,i)
-                    claseDelPunto = prediccion (puntoDeTest,loskvecinos)
-                    totalElementos = totalElementos + 1
+                    claseDelPunto = prediccion (puntoDeTest,loskvecinos[0:j])
                     if (claseDelPunto==puntoDeTest[-1]):
-                        aciertos = aciertos + 1
+                        listadedatos[j-1] = listadedatos[j-1] + 1
                     n = int((progreso*100)/total)
                     progress_callback.emit(n)
-            porcentajeDeAciertos = (aciertos / totalElementos) * 100
-            self.resultadosTestUsuario.append((i,porcentajeDeAciertos))
+        
+        puntosDeTest = self.datos.obtenerDatosTest(self.porcentajeEntrenamiento)
+        for i in range(0,k):
+            listadedatos[i] = (listadedatos[i]/(10*len(puntosDeTest)))*100
+        for i in range(1,k+1):
+            self.resultadosTestUsuario.append((i,listadedatos[i-1]))
         #for resultado in resultados:
             #self.txtTest.insertPlainText("Con K = " + str(resultado[0]) + ", la eficacia fue de " + "{:.2f}".format(resultado[1]) + "% \n")
             #TODO: esto no debería pasar porque están en hilos distintos
