@@ -196,7 +196,7 @@ class Ui_MainWindow(object):
         self.radioElbow.setText(_translate("MainWindow", "Método del Codo (Elbow)"))
         self.radioRaiz.setText(_translate("MainWindow", "Método de la raíz cuadrada"))
         self.btnGraficoMetodo.setText(_translate("MainWindow", "Visualizar Gráfico con K calculado"))
-        self.btnTestMetodo.setText(_translate("MainWindow", "Calcular K y Testear modelo"))
+        self.btnTestMetodo.setText(_translate("MainWindow", "Calcular K óptimo y testear"))
         self.grupoTestUsuario.setTitle(_translate("MainWindow", "K definido por el usuario"))
         self.btnTestUsuario.setText(_translate("MainWindow", "Testear Modelo"))
         self.labelKTest.setText(_translate("MainWindow", "Valor máximo de K"))

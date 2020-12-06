@@ -554,7 +554,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             i = i + 1        
         puntos = self.datos.datosCompletos#ËpuntosEntrenamiento = self.datos.obtenerDatosEntrenamiento(self.porcentajeEntrenamiento)
         for punto in puntos:#puntosEntrenamiento:
-            pyplot.plot(punto[0],punto[1],marker = '.',color = self.diccionario[punto[2]])
+            pyplot.plot(punto[0],punto[1],marker = 'o',color = self.diccionario[punto[2]])
             
         leyendas = []
         for clase in self.datos.clases:
