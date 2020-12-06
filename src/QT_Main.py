@@ -1,4 +1,5 @@
 import datetime
+import time
 import os
 import sys
 #import logging
@@ -34,6 +35,8 @@ from collections import Counter
 from hilos import Worker
 from hilos import WorkerSignals
 
+import numpy as np
+
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QObject, QRunnable, QThreadPool,pyqtSlot, pyqtSignal
 from PyQt5.QtCore import QRegExp
@@ -41,6 +44,9 @@ from PyQt5.QtGui import QRegExpValidator
 #from PyQt5.QtGui import *
 #from PyQt5.QtWidgets import *
 #from PyQt5.QtCore import *
+
+
+from matplotlib.colors import ListedColormap
 
 import time
 
@@ -60,7 +66,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.spinEntrenamiento.setValue(70)
         self.spinKUsuario.setValue(10)
         self.groupBox.setEnabled(False)
-        self.radioCuadrado.setChecked(True)
+        self.radioCirculo.setChecked(True)
+        self.radioCuadrado.setEnabled(False)
         self.radioElbow.setChecked(True)
         self.barraProgreso.setEnabled(False)
         self.btnGraficoMetodo.setEnabled(False)
@@ -503,10 +510,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         ax.plot(limiteInferiorX,limiteInferiorY)
         if self.obtenerRA():
             ax.set_aspect(1)
-        if(len(self.datos.clases)>9):
-            self.colores = colors.CSS4_COLORS
-        else:
-            self.colores = colors.TABLEAU_COLORS
+        #if(len(self.datos.clases)>9):
+            #self.colores = colors.CSS4_COLORS
+        #else:
+            #self.colores = colors.TABLEAU_COLORS
+        self.colores = colors.TABLEAU_COLORS
         
         #divisionX = (self.datos.maxX() + valorDeSeparacionX - self.datos.minX() + valorDeSeparacionY) / (self.numero_de_divisiones)
         #divisionY = (self.datos.maxY() + valorDeSeparacionY - self.datos.minY() + valorDeSeparacionY) / (self.numero_de_divisiones)
@@ -547,10 +555,30 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             leyendas.append(Line2D([0],[0],lw=4,marker='o',color=self.diccionario[clase]))
         pyplot.legend(leyendas, self.datos.clases,loc='upper left')
 
+        #print(self.colores)
+        #print(lista)
+        #print(self.diccionario)
+
+        self.gridcolores = []
+        self.gridclases = {}
+
+        self.gridcolores.append('#FFFFFF')
+        i = 1
+        for clase in self.datos.clases:
+            self.gridclases[clase] = i
+            self.gridcolores.append(self.diccionario[clase])   
+            i = i + 1     
+        #print(self.gridclases) 
+        #print(self.gridcolores)
+
+        inicio = time.time()
         if (self.radioCuadrado.isChecked()==True):
             self.insertarGridV2(grafico,ax,limiteInferiorX,limiteSuperiorX,limiteInferiorY,limiteSuperiorY,k,self.obtenerCelda())
         else:
-            self.insertarCirculos(grafico,ax,limiteInferiorX,limiteSuperiorX,limiteInferiorY,limiteSuperiorY,k,self.obtenerCelda())
+            self.insertarArray(pyplot,grafico,ax,limiteInferiorX,limiteSuperiorX,limiteInferiorY,limiteSuperiorY,k,self.obtenerCelda())
+            #self.insertarCirculos(grafico,ax,limiteInferiorX,limiteSuperiorX,limiteInferiorY,limiteSuperiorY,k,self.obtenerCelda())
+        fin = time.time()
+        #print(fin-inicio)
         if tipoDeGrafico=='Usuario':
             nombre = tipoDeGrafico + str(k)
         else:
@@ -564,11 +592,69 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 mensaje = 'Rango de K ingresado por el usuario, k = '
         mensaje = mensaje + str(k)
         pyplot.title(mensaje)
+
         
         if imprimir:
             grafico.savefig(nombre)
         else:
             grafico.show()
+
+    def insertarArray(self,elpyplot,grafico,ejes,limiteInferiorX,limiteSuperiorX,limiteInferiorY,limiteSuperiorY,k,salto):
+        cuadrados = []
+        x = limiteInferiorX
+        y = limiteInferiorY
+
+        yDePrueba = y + salto/2
+
+        arreglo = []
+
+        while(y<limiteSuperiorY):
+            fila = []
+            x = limiteInferiorX
+            xDePrueba = x + salto/2
+            while(x<limiteSuperiorX):
+                clases = []
+                clase1 = predecirClase(self.datos.datosCompletos,(xDePrueba-(salto/2),yDePrueba-(salto/2)),k)
+                clases.append(clase1)
+                clase2 = predecirClase(self.datos.datosCompletos,(xDePrueba-(salto/2),yDePrueba+(salto/2)),k)
+                clases.append(clase2)
+                clase3 = predecirClase(self.datos.datosCompletos,(xDePrueba+(salto/2),yDePrueba-(salto/2)),k)
+                clases.append(clase3)
+                clase4 = predecirClase(self.datos.datosCompletos,(xDePrueba+(salto/2),yDePrueba+(salto/2)),k)
+                clases.append(clase4)
+                contadores = Counter(clases)
+                clase = masFrecuente(clases)
+                calidad = contadores[clase]
+                if calidad<3:
+                    fila.append(0)
+                else:
+                    fila.append(self.gridclases[clase])
+                #cuadrado = mpatches.Rectangle((x,y),salto,salto,angle = 0.0,color=color, alpha=(0.5*proporcion),linewidth=0)
+                #cuadrados.append(cuadrado)
+                #ejes.add_patch(cuadrado)
+                x = x + salto
+                xDePrueba = x + salto/2
+            arreglo.append(fila)
+            y = y + salto
+            yDePrueba = y + salto/2
+
+        nuevoarreglo = np.array(arreglo)
+        #print(len(nuevoarreglo)*len(nuevoarreglo[0]))
+        #print(len(arreglo))
+        #print(len(nuevoarreglo))
+        # Setup a mesh grid and values
+        step = salto   # mesh step size
+        xx, yy = np.meshgrid(np.arange(limiteInferiorX, limiteSuperiorX+salto, step), np.arange(limiteInferiorY, limiteSuperiorY+salto, step))
+
+        z = nuevoarreglo#np.random.randint(0, 3, xx.shape)  # random integers in [0, 2]
+
+        lista = list(self.colores.items())
+        cmap = ListedColormap(self.gridcolores)  # color map for [0, 2]
+        elpyplot.pcolormesh(xx, yy, z, cmap=cmap,alpha=0.33)
+
+        # Plot colorbar for color mesh
+        #cbar = elpyplot.colorbar()
+        #cbar.set_ticks([0.33, 1., 1.67])
 
     def insertarGridV2(self,grafico,ejes,limiteInferiorX,limiteSuperiorX,limiteInferiorY,limiteSuperiorY,k,salto):
         cuadrados = []

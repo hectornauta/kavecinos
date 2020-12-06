@@ -17,7 +17,7 @@ class Grids(QMainWindow):
             self.ventana.btnProx.setEnabled(False)
         self.kActual = 1
         self.ventana.lineUsuario.setText(str(self.kActual))
-        self.ventana.lineMejor.setText(str(self.kActual))
+        self.ventana.lineMejor.setText(str(kmetodo))
         self.kMaximo = k
 
         self.ventana.lblUsuario.setPixmap(QPixmap('Usuario'+str(1)+'.png'))
