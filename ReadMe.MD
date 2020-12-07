@@ -11,8 +11,8 @@
 
 **4 - Instalar paquetes (sólo una vez y luego de instalar y activar el entorno)**
 * Moverse a /kavecinos/
-* Comando pip install PyQt5
-* Comando pip install matplotlib
+* Comando pip install PyQt5==5.15.1
+* Comando pip install matplotlib==3.3.2
 * Comando pip install pyqt5-tools (si se desea desarollar la aplicación)
 
 **5 - Cómo ejecutar el programa**
