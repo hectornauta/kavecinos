@@ -79,7 +79,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.linePuntoY.setText('0')
         self.lineCelda.setText('0.5')
         self.btnComparacion.setEnabled(False)
-        self.btnComparacion.setText('Debe calcular un K óptimo para comparar gráficos')
+        self.btnComparacion.setText('Debe calcular un k óptimo para comparar gráficos')
         self.lblCargaTexto.hide()
 
         rx = QRegExp("[0-9]\.?[0-9]*")
@@ -158,10 +158,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
     def finTestMetodo(self):
         for resultado in self.resultadosTestMetodo:
-            self.txtMejorK.insertPlainText("Con K = " + str(resultado[0]) + ", la precisión fue de " + "{:.2f}".format(resultado[1]) + "% \n")
+            self.txtMejorK.insertPlainText("Con k = " + str(resultado[0]) + ", la precisión fue de " + "{:.2f}".format(resultado[1]) + "% \n")
     def finTestUsuario(self):
         for resultado in self.resultadosTestUsuario:
-            self.txtTest.insertPlainText("Con K = " + str(resultado[0]) + ", la precisión fue de " + "{:.2f}".format(resultado[1]) + "% \n")
+            self.txtTest.insertPlainText("Con k = " + str(resultado[0]) + ", la precisión fue de " + "{:.2f}".format(resultado[1]) + "% \n")
 
     #☺def recurring_timer(self):
         #self.counter +=1
@@ -318,7 +318,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.labelTest_2.setText(str(self.porcentajeTest))
         self.btnGraficoMetodo.setEnabled(False)
         self.btnComparacion.setEnabled(False)
-        self.btnComparacion.setText('Debe calcular un K óptimo para comparar gráficos')
+        self.btnComparacion.setText('Debe calcular un k óptimo para comparar gráficos')
 
     def cambiarKUsuario(self):
         self.valorDeK = self.spinKUsuario.value()
@@ -389,7 +389,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def finCalcularKElbow(self):
         self.txtMejorK.insertPlainText("Se ha detectado un k óptimo igual a " + str(self.kMetodo) + "\n ------------- \n")
     def progresoCalcularKElbow(self,n):
-        self.txtMejorK.insertPlainText('Analizando K = ' + str(n) + "\n")
+        self.txtMejorK.insertPlainText('Analizando k = ' + str(n) + "\n")
     def hiloCalcularKElbow(self,progress_callback):
         puntosDeEntrenamiento = self.datos.obtenerDatosEntrenamiento(self.porcentajeEntrenamiento)
         puntosDeTest = self.datos.obtenerDatosTest(self.porcentajeEntrenamiento)
